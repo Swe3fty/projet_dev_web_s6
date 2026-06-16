@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <!-- Title -->
+    <title>Projet panneau</title>
+
+    <!-- CSS Styles -->
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+      integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=="
+      crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- JS Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+      integrity="sha512-7Pi/otdlbbCR+LnW+F7PwFcSDJOuUJB3OxtEHbg4vSMvzvJjde4Po1v4BR9Gdc9aXNUNFVUY+SK51wWT8WF0Gg=="
+      crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="/js/home.js"></script>
+</head>
+
+<body style="background-color: #E7C7A5;">
+  <header id="header">
+    <nav class="navbar navbar-expand-lg" style="background-color: #f5ecdb;">    
+      <a class="navbar-brand" href="#">
+      <img src="img/logo_site_IRVE.png" class="img-fluid" style="max-width: 80px;">
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+      <ul class="navbar-nav text-center">
+        <li class="nav-item active">
+          <a class="nav-link" href="index.html">Accueil</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="visualisation.html">Visualisation</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="statistiques.html">Statistiques</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="cluster.html">Cluster</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="prediction.html">Prédiction</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  </header>
+  <main class="content">
+    <div class="container my-4">
+  <div class="row align-items-center">
+    <!-- Texte à gauche -->
+    <div class="col-md-6">
+      <div class="p-3 bg-light border rounded">
+        <h4>Qui sommes-nous ?</h4>
+        <p>
+          Bienvenue sur le site de l’entreprise Solairis, entreprise de panneaux solaires
+          depuis 1976. Sur ce site, vous retrouverez des statistiques sur nos installations,
+          des informations sur nos produits (en fonction de la marque d’onduleur, la 
+          marque de panneau solaire et du département) ainsi qu’un aperçu sur
+          une carte de toutes les installations que nous avons réalisées.
+        </p>
+      </div>
+    </div>
+
+    <!-- Image à droite -->
+    <div class="col-md-6 text-center">
+      <img src="img/magasin.png" class="img-fluid rounded" alt="Magasin Solairis">
+    </div>
+  </div>
+</div>
+<br><br><br>
+<div class="container my-4">
+  <div class="row align-items-center">
+    <!-- Image à gauche -->
+    <div class="col-md-6 text-center">
+      <img src="img/cherchePanneau.png" class="img-fluid rounded" alt="Recherche panneau solaire">
+    </div>
+
+    <!-- Texte à droite -->
+    <div class="col-md-6">
+      <div class="p-3 bg-light border rounded">
+        <h4>Recherche d’installations</h4>
+        <p>
+          Grâce à notre outil de recherche intégré, vous pouvez explorer facilement toutes les installations solaires répertoriées par notre entreprise. 
+          Recherchez par marque de panneau, type d’onduleur ou localisation géographique pour obtenir des informations précises et fiables. 
+          Que vous soyez un particulier ou un professionnel, cet outil vous aide à comparer, analyser et mieux comprendre nos réalisations sur le terrain.
+        </p>
+
+        <!-- Bouton vers search.html -->
+        <a href="search.html" class="btn btn-primary mt-3">Accéder à la recherche</a>
+      </div>
+    </div>
+  </div>
+</div>
+<br><br><br>
+<div class="container my-4">
+  <div class="row align-items-center">
+    <!-- Texte à gauche -->
+    <div class="col-md-6">
+      <div class="p-3 bg-light border rounded">
+        <h4>Trouvez des installations proches de chez vous</h4>
+        <p>
+          Grâce à notre carte interactive, explorez les installations solaires déjà réalisées dans votre région. 
+          Comparez les configurations, marques et performances d’installations similaires à la vôtre. 
+          Cet outil vous permet d’identifier les tendances locales et de vous projeter concrètement dans votre projet solaire.
+        </p>
+        <a href="map.html" class="btn btn-primary mt-3" id="boutonMap">Voir la carte</a>
+      </div>
+    </div>
+
+    <!-- Image à droite -->
+    <div class="col-md-6 text-center">
+      <img src="img/devantCarte.png" class="img-fluid rounded" alt="Carte des installations solaires">
+    </div>
+  </div>
+</div>
+
+
+      <div class="div_rose" id="stats">
+        <h4>Chiffres clés :</h4>
+        <div id="enregistrements_base"></div>
+        <div id="installations_ans">→ Nombre d’installations par années :</div>
+        <div id="installations_regions">→ Nombre d’installations par région :</div>
+        <div id="installations_ans_regions">→ Nombre d’installations par années et par régions :</div>
+        <div id="installateurs"></div>
+        <div id="marques_onduleurs"></div>
+        <div id="marques_panneaux"></div>
+      </div>
+  </main>
+
+  <section class="">
+  <!-- Footer -->
+    <footer class="text-center text-white" style="background-color: #e1e2e3;" id="footer">
+      <!-- Copyright -->
+      <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+        Victor - Maelenn - CIR2 - 2025
+      </div>
+      <!-- Copyright -->
+    </footer>
+    <!-- Footer -->
+  </section>
+</body>
+
+</html>
