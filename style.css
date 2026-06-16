@@ -24,12 +24,14 @@ body {
 }
 
 h4 {
+  text-align: center;
   font-size: 24px;
   font-weight: 600; /* semi bold */
 }
 
 main {
   color: #333333;
+  padding-bottom: 40px;
 }
 
 .text-shadow-box {
@@ -76,20 +78,6 @@ main {
 }
 
 /* ======================
-   CONTENT
-====================== */
-
-h4 {
-  text-align: center;
-  32px
-}
-
-main {
-  padding-bottom: 70px;
-  flex: 1;
-}
-
-/* ======================
    FOOTER
 ====================== */
 
@@ -106,6 +94,15 @@ main {
   .navbar {
     height: auto;
     padding: 10px;
+  }
+
+  .col-md-6 {
+    margin-bottom: 20px;
+  }
+
+  .col-md-6 img {
+    display: block;
+    margin: 0 auto;
   }
 
   #navbarNav {
