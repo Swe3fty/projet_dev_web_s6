@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <title>IRVE</title>
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+
+  <script src="/js/home.js"></script>
+</head>
+
+<body>
+
+<!-- NAVBAR PLEINE LARGEUR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container-fluid">
+
+    <a class="navbar-brand" href="#">
+      <img src="img/logo_site_IRVE.png" height="40">
+    </a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+      <ul class="navbar-nav">
+
+        <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link" href="visualisation.html">Visualisation</a></li>
+        <li class="nav-item"><a class="nav-link" href="statistiques.html">Statistiques</a></li>
+        <li class="nav-item"><a class="nav-link" href="cluster.html">Cluster</a></li>
+        <li class="nav-item"><a class="nav-link" href="prediction.html">Prédiction</a></li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+
+<!--Main-->
+<main class="content">
+
+    <div class="container my-5">
+        <!--Titre Statistiques-->
+            <div class="col-md-12 text-center">
+                <p>Carte réalisée grâce aux scripts python</p>
+                <br>
+                <h1>Analyses détaillées des infrastructures IRVE par territoire</h1>
+            </div> 
+    </div>
+
+    <!--Blocs de statistiques-->
+    <div class="container my-5">
+        <div class="row g-5">
+
+            <!-- COLONNE GAUCHE : CARTE -->
+            <div class="col-md-8">
+                <div class="p-3 rounded text-shadow-box" style="height: 100%; min-height: 450px;">
+                    <!-- Insère ta carte (iframe Google ou div Leaflet) ici -->
+                    <p class="text-center"><strong>[Emplacement de la Carte]</strong></p>
+                </div>
+            </div>
+
+            <!-- COLONNE DROITE : BLOCS EMPILÉS -->
+            <div class="col-md-4 d-flex flex-column justify-content-between">
+                
+                <!-- Bloc du haut -->
+                <div class="p-3 rounded text-shadow-box mb-4">
+                    <p><strong>Paramètres du modèle</strong></p>
+                    <!-- Ajoute le détail de tes paramètres ici -->
+                </div>
+
+                <!-- Bloc du bas -->
+                <div class="p-3 rounded text-shadow-box">
+                    <p><strong>Légende avec couleurs</strong></p>
+                    <!-- Ajoute le détail de ta légende ici -->
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+</main>
+
+<!--Footer-->
+<footer id="footer">
+
+  <div class="text-center p-3" style="background-color:#0D2233; color:white;">
+    Isen Brest Yncréa - ©2026 <br>
+    Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
+  </div>
+
+</footer>
+
+</body>
+</html>
