@@ -1,0 +1,166 @@
+/* ======================
+   BASE
+====================== */
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #ffffff;
+  overflow-x: hidden;
+  padding-top: 100px;
+}
+
+/* ======================
+   HEADER
+====================== */
+
+#header {
+  position: fixed;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
+
+/* ======================
+   NAVBAR
+====================== */
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 25px;
+
+  background-color: #0D2233;
+  padding: 10px 25px;
+  border-radius: 50px;
+
+  width: 60vw;
+  max-width: 700px;
+}
+
+.navbar-brand img {
+  max-width: 80px;
+  height: auto;
+}
+
+/* MENU */
+.navbar-nav {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: 0.3s;
+}
+
+.nav-link:hover {
+  background-color: #f4c542;
+  color: black;
+}
+
+/* ======================
+   CONTENT
+====================== */
+
+.content {
+  padding-top: 120px;
+}
+
+.container {
+  width: 90%;
+  margin: auto;
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.col-md-6 {
+  flex: 1;
+}
+
+.p-3 {
+  padding: 15px;
+}
+
+.bg-light {
+  background-color: #f5f5f5;
+}
+
+.border {
+  border-radius: 10px;
+}
+
+.img-fluid {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+/* ======================
+   FOOTER
+====================== */
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+
+.footer-inner {
+  background-color: #0D2233;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}
+
+/* ======================
+   RESPONSIVE MOBILE
+====================== */
+
+@media (max-width: 768px) {
+
+  /* NAVBAR */
+  .navbar {
+    flex-direction: column;
+    width: 92vw;
+    padding: 15px;
+    gap: 10px;
+  }
+
+  .navbar-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .nav-link {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+
+  /* CONTENT */
+  .row {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .col-md-6 {
+    width: 100%;
+  }
+
+  .content {
+    padding-top: 140px;
+  }
+}
