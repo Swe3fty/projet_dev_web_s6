@@ -18,9 +18,9 @@ body {
   padding-top: 70px;
   overflow-x: hidden;
 
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
 }
 
 h4 {
@@ -32,6 +32,7 @@ h4 {
 main {
   color: #333333;
   padding-bottom: 40px;
+  flex: 1;
 }
 
 .text-shadow-box {
