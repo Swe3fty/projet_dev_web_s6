@@ -64,7 +64,7 @@ CREATE TABLE station (
   implantation_station VARCHAR(100),
   adresse_station VARCHAR(255),
   lat FLOAT,
-  long FLOAT,
+  `long` FLOAT,
   siren_amenageur VARCHAR(14),
   id_operateur INT,
   nom_enseigne VARCHAR(255),
