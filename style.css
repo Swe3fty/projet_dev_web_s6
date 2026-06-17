@@ -78,6 +78,12 @@ main {
   max-height: 45px;
 }
 
+.nav-link.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;   /* espace entre texte et trait */
+  text-decoration-thickness: 2px;
+}
+
 /* ======================
    FOOTER
 ====================== */
