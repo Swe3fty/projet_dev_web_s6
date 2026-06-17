@@ -1,300 +1,77 @@
 <!DOCTYPE html>
 <html lang="fr">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>IRVE - Visualisation</title>
 
-        <!-- Polices (charte : Montserrat) -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <!-- CSS du site -->
-        <link rel="stylesheet" href="style_visualisation.css" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" href="img/logo_site_IRVE.png">
+  <title>IRVE</title>
 
-        <!-- Leaflet (carte) + clustering -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
-        <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
-        <style>
-            :root {
-                --vert: #4BA037;
-                --vert-btn: #46B93C;
-                --bleu: #0D2233;
-                --gris-clair: #E5E5E5;
-                --gris-fonce: #333333;
-            }
-            body { font-family: 'Montserrat', sans-serif; color: var(--gris-fonce); }
-            h1, h2, h3 { font-family: 'Montserrat', sans-serif; color: var(--bleu); }
-            .titre-page { font-weight: 700; font-size: 32px; text-align: center; }
-            .sous-titre { font-weight: 600; font-size: 20px; text-align: center; color: var(--bleu); }
-            .carte-section {
-                background: #fff; border-radius: 12px; padding: 20px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 24px;
-            }
-            #map {
-                height: 58vh; min-height: 420px; width: 100%;
-                border-radius: 12px; z-index: 1;
-            }
-            .map-wrap { position: relative; }
-            .legende {
-                position: absolute; bottom: 16px; right: 16px; z-index: 500;
-                background: #fff; border-radius: 12px; padding: 12px 16px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 13px;
-            }
-            .legende .pastille { display:inline-block; width:12px; height:12px; border-radius:50%; margin-right:6px; vertical-align:middle; }
-            .form-label { font-weight: 500; color: var(--bleu); font-size: 14px; }
-            .btn-principal {
-                background: var(--vert-btn); color: #fff; border: none;
-                padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: 14px;
-            }
-            .btn-principal:hover { background: var(--vert); color:#fff; }
-            .btn-secondaire {
-                background: var(--bleu); color: #fff; border: none;
-                padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: 14px;
-            }
-            .btn-secondaire:hover { background: #16344d; color:#fff; }
-            .badge-count {
-                background: var(--gris-clair); color: var(--bleu);
-                border-radius: 8px; padding: 8px 14px; font-weight: 500; font-size: 14px;
-            }
-            .popup-borne h6 { color: var(--bleu); font-weight: 700; margin-bottom: 6px; }
-            .popup-borne .ligne { font-size: 13px; margin-bottom: 2px; }
-            .popup-borne i { color: var(--vert); width: 16px; }
-            main.content { padding-bottom: 100px; }
-        </style>
-    </head>
-    <body style="background-color:#FFFFFF;">
-        <header id="header">
-            <nav class="navbar navbar-expand-lg" style="background-color:#0D2233;">
-                <a class="navbar-brand" href="index.html">
-                    <img src="img/logo_site_IRVE.png" class="img-fluid" style="max-width:30px;">
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                    <ul class="navbar-nav text-center">
-                        <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
-                        <li class="nav-item active"><a class="nav-link" href="visualisation.html">Visualisation</a></li>
-                        <li class="nav-item"><a class="nav-link" href="statistiques.html">Statistiques</a></li>
-                        <li class="nav-item"><a class="nav-link" href="cluster.html">Cluster</a></li>
-                        <li class="nav-item"><a class="nav-link" href="prediction.html">Prédiction</a></li>
-                    </ul>
-                </div>
-            </nav>
-        </header>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
 
-        <main class="content">
-            <div class="container my-4">
-                <h1 class="titre-page mb-1">Localisation des bornes en France</h1>
-                <p class="sous-titre mb-4">Visualisation des points de charge</p>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-                <!-- Carte -->
-                <div class="carte-section">
-                    <div class="map-wrap">
-                        <div id="map"></div>
-                        <div class="legende">
-                            <div class="mb-1" style="font-weight:600;color:#0D2233;">Puissance</div>
-                            <div><span class="pastille" style="background:#4BA037;"></span> Rapide (&gt; 50 kW)</div>
-                            <div><span class="pastille" style="background:#0D2233;"></span> Accélérée (22-50 kW)</div>
-                            <div><span class="pastille" style="background:#6c757d;"></span> Normale (&lt; 22 kW)</div>
-                        </div>
-                    </div>
-                </div>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-                <!-- Sélection des bornes -->
-                <div class="carte-section">
-                    <h2 class="sous-titre" style="text-align:left;margin-bottom:16px;">Affichage des données et sélection des bornes</h2>
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-4">
-                            <label class="form-label" for="rech-commune">Recherche (commune / station)</label>
-                            <input class="form-control" id="rech-commune" list="liste-communes" placeholder="Ex : brest, lyon...">
-                            <datalist id="liste-communes"></datalist>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="filtre-operateur">Opérateur</label>
-                            <select class="form-select" id="filtre-operateur"><option value="">Tous</option></select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label" for="filtre-puissance">Puissance</label>
-                            <select class="form-select" id="filtre-puissance">
-                                <option value="">Toutes</option>
-                                <option value="rapide">Rapide (&gt; 50 kW)</option>
-                                <option value="accel">Accélérée (22-50 kW)</option>
-                                <option value="normal">Normale (&lt; 22 kW)</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2 d-grid">
-                            <button class="btn-principal" data-bs-toggle="modal" data-bs-target="#modalAjout">
-                                <i class="fa-solid fa-plus"></i> Ajouter une borne
-                            </button>
-                        </div>
-                    </div>
-                    <div class="mt-3"><span class="badge-count" id="compteur">0 borne affichée</span></div>
-                </div>
+  <link rel="stylesheet" href="style.css">
 
-                <!-- Prédictions -->
-                <div class="d-flex flex-wrap gap-3 justify-content-center mb-2">
-                    <a class="btn-secondaire" href="cluster.html"><i class="fa-solid fa-diagram-project"></i> Prédire les clusters</a>
-                    <a class="btn-secondaire" href="prediction.html"><i class="fa-solid fa-location-dot"></i> Prédire l'implantation</a>
-                    <a class="btn-secondaire" href="prediction.html"><i class="fa-solid fa-bolt"></i> Prédire la puissance</a>
-                </div>
-            </div>
-        </main>
+  <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 
-        <!-- Modal : ajouter une borne -->
-        <div class="modal fade" id="modalAjout" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content" style="border-radius:12px;">
-                    <div class="modal-header" style="background:#0D2233;color:#fff;border-radius:12px 12px 0 0;">
-                        <h5 class="modal-title">Ajouter une borne</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
-                    </div>
-                    <form id="form-ajout">
-                        <div class="modal-body">
-                            <div class="row g-2">
-                                <div class="col-12"><label class="form-label">Nom de la station</label><input class="form-control" name="nom" required></div>
-                                <div class="col-6"><label class="form-label">Commune</label><input class="form-control" name="commune"></div>
-                                <div class="col-6"><label class="form-label">Opérateur</label><input class="form-control" name="operateur"></div>
-                                <div class="col-6"><label class="form-label">Latitude</label><input class="form-control" name="lat" type="number" step="any" required></div>
-                                <div class="col-6"><label class="form-label">Longitude</label><input class="form-control" name="lon" type="number" step="any" required></div>
-                                <div class="col-6"><label class="form-label">Puissance (kW)</label><input class="form-control" name="puissance" type="number" step="any"></div>
-                                <div class="col-6"><label class="form-label">Accès</label><input class="form-control" name="acces" placeholder="accès libre"></div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn-secondaire" data-bs-dismiss="modal">Annuler</button>
-                            <button type="submit" class="btn-principal">Ajouter sur la carte</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+  <script src="/js/home.js" defer></script>
+</head>
 
-        <section>
-            <footer class="text-center text-white" style="background-color:#e1e2e3;" id="footer">
-                <div class="text-center p-3" style="background-color:#0D2233;"> Isen Brest Yncréa - ©2026
-                    <br> Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
-                </div>
-            </footer>
-        </section>
+<body>
 
-        <!-- Scripts -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-        <script>
-            // Carte centree sur la France metropolitaine.
-            const map = L.map('map').setView([46.6, 2.5], 6);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
+<!-- NAVBAR PLEINE LARGEUR -->
+<nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+  <div class="container-fluid">
 
-            const cluster = L.markerClusterGroup({ chunkedLoading: true });
-            map.addLayer(cluster);
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <img src="img/logo_site_IRVE.png" height="40" alt="logo">
+        <span class="brand-name">BORNEO</span>
+    </a>
 
-            // Source de donnees : API PHP (voir rendus_pdf/Interface_backend_client.pdf).
-            const API = 'php/request.php';
-            let bornes = [];
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-            function categorie(p) {
-                if (p > 50) return { cat: 'rapide', couleur: '#4BA037' };
-                if (p >= 22) return { cat: 'accel', couleur: '#0D2233' };
-                return { cat: 'normal', couleur: '#6c757d' };
-            }
+    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+      <ul class="navbar-nav">
 
-            function popupHtml(b) {
-                const gratuit = b.gratuit ? '<span style="color:#4BA037;">Gratuit</span>' : 'Payant';
-                return `<div class="popup-borne">
-                    <h6>${b.nom || 'Borne'}</h6>
-                    <div class="ligne"><i class="fa-solid fa-location-dot"></i> ${b.commune || ''} ${b.cp || ''}</div>
-                    <div class="ligne"><i class="fa-solid fa-bolt"></i> ${b.puissance || '?'} kW</div>
-                    <div class="ligne"><i class="fa-solid fa-charging-station"></i> ${b.operateur || ''}</div>
-                    <div class="ligne"><i class="fa-solid fa-door-open"></i> ${b.acces || ''} - ${gratuit}</div>
-                    <div class="ligne"><i class="fa-solid fa-wheelchair"></i> ${b.pmr || 'n.c.'}</div>
-                </div>`;
-            }
+        <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+        <li class="nav-item"><a class="nav-link active" href="visualisation.html">Visualisation</a></li>
+        <li class="nav-item"><a class="nav-link" href="statistiques.html">Statistiques</a></li>
 
-            function afficher(liste) {
-                cluster.clearLayers();
-                liste.forEach(b => {
-                    const c = categorie(b.puissance);
-                    const m = L.circleMarker([b.lat, b.lon], {
-                        radius: 6, color: c.couleur, fillColor: c.couleur,
-                        fillOpacity: 0.85, weight: 1
-                    }).bindPopup(popupHtml(b));
-                    cluster.addLayer(m);
-                });
-                document.getElementById('compteur').textContent =
-                    liste.length.toLocaleString('fr-FR') + (liste.length > 1 ? ' bornes affichées' : ' borne affichée');
-            }
+      </ul>
+    </div>
 
-            function filtrer() {
-                const q = document.getElementById('rech-commune').value.trim().toLowerCase();
-                const op = document.getElementById('filtre-operateur').value;
-                const pu = document.getElementById('filtre-puissance').value;
-                const res = bornes.filter(b => {
-                    if (q && !((b.commune || '').toLowerCase().includes(q) || (b.nom || '').toLowerCase().includes(q))) return false;
-                    if (op && b.operateur !== op) return false;
-                    if (pu && categorie(b.puissance).cat !== pu) return false;
-                    return true;
-                });
-                afficher(res);
-            }
+  </div>
+</nav>
 
-            function remplirControles() {
-                const ops = [...new Set(bornes.map(b => b.operateur).filter(Boolean))].sort();
-                const selOp = document.getElementById('filtre-operateur');
-                ops.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; selOp.appendChild(opt); });
-                const communes = [...new Set(bornes.map(b => b.commune).filter(Boolean))].sort();
-                const dl = document.getElementById('liste-communes');
-                communes.slice(0, 2000).forEach(c => { const opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
-            }
 
-            ['rech-commune', 'filtre-operateur', 'filtre-puissance'].forEach(id =>
-                document.getElementById(id).addEventListener('input', filtrer));
+<main class="content">
 
-            // Ajout d'une borne : affichage immediat sur la carte + envoi a l'API (POST).
-            document.getElementById('form-ajout').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const f = e.target;
-                const b = {
-                    nom: f.nom.value, commune: f.commune.value, operateur: f.operateur.value,
-                    lat: parseFloat(f.lat.value), lon: parseFloat(f.lon.value),
-                    puissance: parseFloat(f.puissance.value) || 0, acces: f.acces.value, gratuit: false
-                };
-                // Enregistrement dans la base via l'API.
-                fetch(API + '/points-charge/', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(b)
-                }).catch(err => console.error(err));
+    <h4>Page visualisation</h4>
 
-                bornes.push(b);
-                filtrer();
-                map.setView([b.lat, b.lon], 13);
-                bootstrap.Modal.getInstance(document.getElementById('modalAjout')).hide();
-                f.reset();
-            });
+</main>
 
-            // Chargement des stations depuis la base via l'API.
-            fetch(API + '/stations/')
-                .then(r => r.json())
-                .then(data => {
-                    bornes = data;
-                    remplirControles();
-                    afficher(bornes);
-                })
-                .catch(err => {
-                    console.error(err);
-                    document.getElementById('compteur').textContent =
-                        'Erreur de chargement des données';
-                });
-        </script>
-    </body>
+
+<footer id="footer">
+
+  <div class="text-center p-3" style="background-color:#0D2233; color:white;">
+    Isen Brest Yncréa - ©2026 <br>
+    Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
+  </div>
+
+</footer>
+
+</body>
 </html>
