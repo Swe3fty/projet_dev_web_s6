@@ -2,76 +2,168 @@
 <html lang="fr">
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <link rel="icon" href="img/logo_site_IRVE.png">
-  <title>IRVE</title>
+    <link rel="icon" href="img/logo_site_IRVE.png">
+    <title>IRVE - Visualisation</title>
 
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
 
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Leaflet (carte) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Styles du site -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="visualisation.css">
 
-  <link rel="stylesheet" href="style.css">
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
-
-  <script src="/js/home.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
 
 <!-- NAVBAR PLEINE LARGEUR -->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-  <div class="container-fluid">
-
-    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
-        <img src="img/logo_site_IRVE.png" height="40" alt="logo">
-        <span class="brand-name">BORNEO</span>
-    </a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-      data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-
-    <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-      <ul class="navbar-nav">
-
-        <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
-        <li class="nav-item"><a class="nav-link active" href="visualisation.html">Visualisation</a></li>
-        <li class="nav-item"><a class="nav-link" href="statistiques.html">Statistiques</a></li>
-
-      </ul>
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
+            <img src="img/logo_site_IRVE.png" height="40" alt="logo">
+            <span class="brand-name">BORNEO</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link" href="index.html">Accueil</a></li>
+                <li class="nav-item"><a class="nav-link active" href="visualisation.html">Visualisation</a></li>
+                <li class="nav-item"><a class="nav-link" href="statistiques.html">Statistiques</a></li>
+            </ul>
+        </div>
     </div>
-
-  </div>
 </nav>
 
 
 <main class="content">
+    <div class="container my-4">
+        <h1 class="titre-page mb-1">Localisation des bornes en France</h1>
+        
+        <!-- Sélection des bornes -->
+        <div class="carte-section">
+            <h2 class="sous-titre" style="text-align:left;margin-bottom:16px;">Affichage des données et sélection des bornes</h2>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label" for="rech-commune">Recherche (commune / station)</label>
+                    <input class="form-control" id="rech-commune" list="liste-communes" placeholder="Ex : brest, lyon...">
+                    <datalist id="liste-communes"></datalist>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="filtre-operateur">Opérateur</label>
+                    <select class="form-select" id="filtre-operateur"><option value="">Tous</option></select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="filtre-puissance">Puissance</label>
+                    <select class="form-select" id="filtre-puissance">
+                        <option value="">Toutes</option>
+                        <option value="rapide">Rapide (&gt; 50 kW)</option>
+                        <option value="accel">Accélérée (22-50 kW)</option>
+                        <option value="normal">Normale (&lt; 22 kW)</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button class="btn-principal" data-bs-toggle="modal" data-bs-target="#modalAjout">
+                        <i class="fa-solid fa-plus"></i> Ajouter une borne
+                    </button>
+                </div>
+            </div>
+            <div class="mt-3"><span class="badge-count" id="compteur">0 borne affichée</span></div>
+        </div>
+        
+        <!-- Carte -->
+        <p class="sous-titre mb-4">Visualisation des points de charge</p>
+        <div class="carte-section">
+            <div class="map-wrap">
+                <div id="map"></div>
+            </div>
+        </div>
 
-    <h4>Page visualisation</h4>
+        <!-- Tableau -->
+        <div class="carte-section">
+            <h2 class="sous-titre" style="text-align:left;margin-bottom:16px;">Tableau des bornes</h2>
+            <div class="table-wrap">
+                <table class="table table-striped table-hover align-middle mb-0" id="tableau-bornes">
+                    <thead>
+                        <tr>
+                            <th>Sél.</th>
+                            <th>Station</th>
+                            <th>Commune</th>
+                            <th>CP</th>
+                            <th>Opérateur</th>
+                            <th>Puissance</th>
+                            <th>Points de charge</th>
+                            <th>Accès</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+            <div id="pagination" class="d-flex justify-content-center align-items-center gap-2 mt-3"></div>
+            <div id="note-tableau" class="text-muted text-center mt-2" style="font-size:13px;"></div>
+        </div>
 
+        <!-- Prédictions -->
+        <div class="d-flex flex-wrap gap-3 justify-content-center mb-2">
+            <a class="btn-secondaire" id="btn-cluster" href="cluster.html"><i class="fa-solid fa-diagram-project"></i> Prédire les clusters</a>
+            <a class="btn-secondaire" href="prediction.html"><i class="fa-solid fa-location-dot"></i> Prédire l'implantation</a>
+            <a class="btn-secondaire" href="prediction.html"><i class="fa-solid fa-bolt"></i> Prédire la puissance</a>
+        </div>
+    </div>
 </main>
 
+<!-- Modal : ajouter une borne -->
+<div class="modal fade" id="modalAjout" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px;">
+            <div class="modal-header" style="background:#0D2233;color:#fff;border-radius:12px 12px 0 0;">
+                <h5 class="modal-title">Ajouter une borne</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form id="form-ajout">
+                <div class="modal-body">
+                    <div class="row g-2">
+                        <div class="col-12"><label class="form-label">Nom de la station</label><input class="form-control" name="nom" required></div>
+                        <div class="col-6"><label class="form-label">Commune</label><input class="form-control" name="commune"></div>
+                        <div class="col-6"><label class="form-label">Opérateur</label><input class="form-control" name="operateur"></div>
+                        <div class="col-6"><label class="form-label">Latitude</label><input class="form-control" name="lat" type="number" step="any" required></div>
+                        <div class="col-6"><label class="form-label">Longitude</label><input class="form-control" name="lon" type="number" step="any" required></div>
+                        <div class="col-6"><label class="form-label">Puissance (kW)</label><input class="form-control" name="puissance" type="number" step="any"></div>
+                        <div class="col-6"><label class="form-label">Accès</label><input class="form-control" name="acces" placeholder="accès libre"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondaire" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-principal">Ajouter sur la carte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <footer id="footer">
-
-  <div class="text-center p-3" style="background-color:#0D2233; color:white;">
-    Isen Brest Yncréa - ©2026 <br>
-    Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
-  </div>
-
+    <div class="text-center p-3" style="background-color:#0D2233; color:white;">
+        Isen Brest Yncréa - ©2026 <br>
+        Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
+    </div>
 </footer>
+
+<!-- Scripts -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data/bornes.js"></script>     <!-- donnees de secours pour test local -->
+<script src="visualisation.js"></script>
 
 </body>
 </html>

@@ -1,0 +1,52 @@
+/* Styles propres a la page Visualisation (carte, legende, filtres, tableau) */
+
+:root {
+    --vert: #4BA037;
+    --vert-btn: #46B93C;
+    --bleu: #0D2233;
+    --gris-clair: #E5E5E5;
+    --gris-fonce: #333333;
+}
+
+.titre-page { font-weight: 700; font-size: 32px; text-align: center; color: var(--bleu); }
+.sous-titre { font-weight: 600; font-size: 20px; text-align: center; color: var(--bleu); }
+
+.carte-section {
+    background: #fff; border-radius: 12px; padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); margin-bottom: 24px;
+}
+
+#map {
+    height: 58vh; min-height: 420px;
+    width: 100%; max-width: 900px; margin: 0 auto;   /* centree, pas pleine largeur */
+    border-radius: 12px; z-index: 1;
+}
+.map-wrap { position: relative; }
+
+.form-label { font-weight: 500; color: var(--bleu); font-size: 14px; }
+
+.btn-principal {
+    background: var(--vert-btn); color: #fff; border: none;
+    padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: 14px;
+}
+.btn-principal:hover { background: var(--vert); color: #fff; }
+
+.btn-secondaire {
+    background: var(--bleu); color: #fff; border: none;
+    padding: 12px 20px; border-radius: 8px; font-weight: 500; font-size: 14px;
+}
+.btn-secondaire:hover { background: #16344d; color: #fff; }
+
+.badge-count {
+    background: var(--gris-clair); color: var(--bleu);
+    border-radius: 8px; padding: 8px 14px; font-weight: 500; font-size: 14px;
+}
+
+.popup-borne h6 { color: var(--bleu); font-weight: 700; margin-bottom: 6px; }
+.popup-borne .ligne { font-size: 13px; margin-bottom: 2px; }
+.popup-borne i { color: var(--vert); width: 16px; }
+
+/* Tableau (les 20 lignes de la page sont toutes visibles, pas de scroll interne) */
+.table-wrap { border-radius: 12px; }
+#tableau-bornes thead th { background: var(--bleu); color: #fff; font-weight: 600; font-size: 14px; }
+#tableau-bornes td { font-size: 14px; vertical-align: middle; }
