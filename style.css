@@ -78,6 +78,28 @@ main {
   max-height: 45px;
 }
 
+.brand-name {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ffffff;
+  text-transform: uppercase;
+}
+
+.navbar-brand img {
+  transition: transform 0.2s ease;
+}
+
+.navbar-brand:hover img {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.nav-link.active {
+  text-decoration: underline;
+  text-underline-offset: 6px;   /* espace entre texte et trait */
+  text-decoration-thickness: 2px;
+}
+
 /* ======================
    FOOTER
 ====================== */
