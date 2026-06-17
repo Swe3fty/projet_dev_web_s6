@@ -23,7 +23,9 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" defer></script>
 
-  <script src="/js/home.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="js/statistiques.js" defer></script>
+
 </head>
 
 <body>
@@ -69,10 +71,7 @@
       </div>
 
     <select class="form-select" aria-label="Default select example" id="departements-select">
-        <option selected>Open this select menu</option>
-        <option value="1">One</option>
-        <option value="2">Two</option>
-        <option value="3">Three</option>
+        <option selected>Choix du département</option>
     </select>
 
 
@@ -82,34 +81,26 @@
     <div class="container">
         <div class="row g-5">
             <div class="col-md-3">
-                <div class="p-3 rounded text-shadow-box">
-                    <p>
-                        données
-                    </p>
+                <div class="p-3 rounded text-shadow-box text-center" id ="total-stations">
+                    <h1>Stations</h1>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="p-3 rounded text-shadow-box">
-                    <p>
-                        données
-                    </p>
+                <div class="p-3 rounded text-shadow-box text-center" id="nb-pdc">
+                    <h1>Points de charge</h1>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="p-3 rounded text-shadow-box">
-                    <p>
-                        données
-                    </p>
+                <div class="p-3 rounded text-shadow-box text-center" id="puissance-moy">
+                    <h1>Puissance moyenne</h1>
                 </div>
             </div>
 
             <div class="col-md-3">
-                <div class="p-3 rounded text-shadow-box">
-                    <p>
-                        données
-                    </p>
+                <div class="p-3 rounded text-shadow-box text-center" id="nb-op">
+                    <h1>Opérateurs</h1>
                 </div>
             </div>
         </div>
@@ -118,29 +109,30 @@
     <!--Graphes-->
     <div class="container my-5">
         <div class="row g-5">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <div class="p-3 rounded text-shadow-box">
-                            Graphe 1
+                        <div class="charts-container align-items-center">
+                            <canvas id="chartPuissances"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="p-3 rounded text-shadow-box">
-                            Graphe 2
+                        <div class="charts-container align-items-center">
+                            <canvas id="chartOperateurs"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="p-3 rounded text-shadow-box">
-                            Graphe 3
+                        <div class="charts-container align-items-center">
+                            <canvas id="chartImplantation"></canvas>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="p-3 rounded text-shadow-box">
-                            Graphe 4
-                    </div>
-                </div>
         </div>
     </div>
 
