@@ -1,0 +1,51 @@
+#header {
+    position: fixed;
+    top: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1030;
+}
+
+h4 {
+    text-align: center;
+}
+
+main {
+    padding-bottom: 70px;
+}
+
+.content {
+    padding-top: 120px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.navbar {
+  border-radius: 50px;
+  padding: 4px 30px;
+  font-family: 'Poppins', sans-serif;
+  width: 50vw;
+  max-width: 650px;
+  min-height: 60px;
+}
+
+#navbarNav .nav-link {
+  font-size: 0.95rem;
+  color: #FFFFFF !important;
+  padding: 6px 20px;
+  border-radius: 30px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+#navbarNav .nav-link:hover {
+  background-color: #f4c542;
+  color: #000 !important;
+}
+
+.navbar-brand {
+  margin-left: 20px;
+}
