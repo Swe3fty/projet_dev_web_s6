@@ -187,8 +187,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
         <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
-        <!-- Donnees : version JS pour fonctionner sans serveur. -->
-        <script src="data/bornes.js"></script>
         <script>
             // Carte centree sur la France metropolitaine.
             const map = L.map('map').setView([46.6, 2.5], 6);
@@ -200,10 +198,9 @@
             const cluster = L.markerClusterGroup({ chunkedLoading: true });
             map.addLayer(cluster);
 
-            // Source de donnees : variable globale BORNES (data/bornes.js).
-            // Pour brancher la base MySQL : remplacer par
-            //   fetch('api/bornes.php').then(r => r.json()).then(d => { bornes = d; init(); })
-            let bornes = Array.isArray(window.BORNES) ? window.BORNES : [];
+            // Source de donnees : API PHP (voir rendus_pdf/Interface_backend_client.pdf).
+            const API = 'php/request.php';
+            let bornes = [];
 
             function categorie(p) {
                 if (p > 50) return { cat: 'rapide', couleur: '#4BA037' };
@@ -262,7 +259,7 @@
             ['rech-commune', 'filtre-operateur', 'filtre-puissance'].forEach(id =>
                 document.getElementById(id).addEventListener('input', filtrer));
 
-            // Ajout d'une borne (cote client ; a relier a une API POST -> MySQL).
+            // Ajout d'une borne : affichage immediat sur la carte + envoi a l'API (POST).
             document.getElementById('form-ajout').addEventListener('submit', function (e) {
                 e.preventDefault();
                 const f = e.target;
@@ -271,6 +268,13 @@
                     lat: parseFloat(f.lat.value), lon: parseFloat(f.lon.value),
                     puissance: parseFloat(f.puissance.value) || 0, acces: f.acces.value, gratuit: false
                 };
+                // Enregistrement dans la base via l'API.
+                fetch(API + '/points-charge/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(b)
+                }).catch(err => console.error(err));
+
                 bornes.push(b);
                 filtrer();
                 map.setView([b.lat, b.lon], 13);
@@ -278,8 +282,19 @@
                 f.reset();
             });
 
-            remplirControles();
-            afficher(bornes);
+            // Chargement des stations depuis la base via l'API.
+            fetch(API + '/stations/')
+                .then(r => r.json())
+                .then(data => {
+                    bornes = data;
+                    remplirControles();
+                    afficher(bornes);
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('compteur').textContent =
+                        'Erreur de chargement des données';
+                });
         </script>
     </body>
 </html>
