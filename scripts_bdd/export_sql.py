@@ -19,11 +19,13 @@ df = df.rename(columns={"consolidated_commune": "nom_commune",
 # --- Nettoyage ---
 prises = ["prise_type_ef", "prise_type_2", "prise_type_combo_ccs",
           "prise_type_chademo", "prise_type_autre"]
-for c in prises + ["gratuit", "paiement_cb"]:        
-    df[c] = df[c].map({"VRAI": 1, "TRUE": 1, "FAUX": 0, "FALSE": 0})# VRAI/FAUX -> 1/0
 
-df["date_mise_en_service"] = pd.to_datetime(         
-    df["date_mise_en_service"], format="%d/%m/%Y", errors="coerce").dt.date# jj/mm/aaaa -> aaaa-mm-jj
+bool_map = {"vrai": 1, "true": 1, "faux": 0, "false": 0}
+for c in prises + ["gratuit", "paiement_cb"]:
+    df[c] = df[c].astype(str).str.lower().map(bool_map)
+
+df["date_mise_en_service"] = pd.to_datetime(
+    df["date_mise_en_service"], format="%Y-%m-%d", errors="coerce").dt.date
 
 coords = df["coordonneesXY"].str.strip("[]").str.split(",", expand=True)
 df["long"] = pd.to_numeric(coords[0], errors="coerce")

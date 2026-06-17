@@ -11,7 +11,7 @@ PASSWORD = "O3C4Kx_KJmvQc9yB"
 DB = "mbourg28"
 
 FICHIERS = [
-    "projet_dev_web_s6/bornes_irve.sql",   # structure des tables
+    "projet_dev_web_s6/BDD/bornes_irve.sql",   # structure des tables
     "bornes_data.sql.gz",                  # donnees
 ]
 
