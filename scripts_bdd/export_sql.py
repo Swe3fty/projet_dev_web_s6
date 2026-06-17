@@ -24,6 +24,9 @@ bool_map = {"vrai": 1, "true": 1, "faux": 0, "false": 0}
 for c in prises + ["gratuit", "paiement_cb"]:
     df[c] = df[c].astype(str).str.lower().map(bool_map)
 
+df["gratuit"] = df["gratuit"].astype("Int64")
+df["paiement_cb"] = df["paiement_cb"].astype("Int64")
+
 df["date_mise_en_service"] = pd.to_datetime(
     df["date_mise_en_service"], format="%Y-%m-%d", errors="coerce").dt.date
 
