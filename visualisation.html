@@ -75,16 +75,16 @@
                     </select>
                 </div>
                 <div class="col-md-2 d-grid">
-                    <button class="btn-principal" data-bs-toggle="modal" data-bs-target="#modalAjout">
+                    <button class="btn-principal" id="btn-ajouter" data-bs-toggle="modal" data-bs-target="#modalAjout">
                         <i class="fa-solid fa-plus"></i> Ajouter une borne
                     </button>
                 </div>
             </div>
-            <div class="mt-3"><span class="badge-count" id="compteur">0 borne affichée</span></div>
+            <div class="mt-3"><span class="badge-count" id="compteur">0 station affichée</span></div>
         </div>
         
         <!-- Carte -->
-        <p class="sous-titre mb-4">Visualisation des points de charge</p>
+        <p class="sous-titre mb-4">Visualisation des stations</p>
         <div class="carte-section">
             <div class="map-wrap">
                 <div id="map"></div>
@@ -93,7 +93,7 @@
 
         <!-- Tableau -->
         <div class="carte-section">
-            <h2 class="sous-titre" style="text-align:left;margin-bottom:16px;">Tableau des bornes</h2>
+            <h2 class="sous-titre" style="text-align:left;margin-bottom:16px;">Tableau des points de charge</h2>
             <div class="table-wrap">
                 <table class="table table-striped table-hover align-middle mb-0" id="tableau-bornes">
                     <thead>
@@ -104,8 +104,9 @@
                             <th>CP</th>
                             <th>Opérateur</th>
                             <th>Puissance</th>
-                            <th>Points de charge</th>
                             <th>Accès</th>
+                            <th>Gratuit</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -129,7 +130,7 @@
     <div class="modal-dialog">
         <div class="modal-content" style="border-radius:12px;">
             <div class="modal-header" style="background:#0D2233;color:#fff;border-radius:12px 12px 0 0;">
-                <h5 class="modal-title">Ajouter une borne</h5>
+                <h5 class="modal-title" id="titre-modal">Ajouter une borne</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
             </div>
             <form id="form-ajout">
@@ -147,6 +148,37 @@
                 <div class="modal-footer">
                     <button type="button" class="btn-secondaire" data-bs-dismiss="modal">Annuler</button>
                     <button type="submit" class="btn-principal">Ajouter sur la carte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal : modifier un point de charge -->
+<div class="modal fade" id="modalEdit" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="border-radius:12px;">
+            <div class="modal-header" style="background:#0D2233;color:#fff;border-radius:12px 12px 0 0;">
+                <h5 class="modal-title">Modifier le point de charge</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <form id="form-edit">
+                <input type="hidden" name="id">
+                <div class="modal-body">
+                    <div class="row g-2">
+                        <div class="col-6"><label class="form-label">Puissance (kW)</label><input class="form-control" name="puissance" type="number" step="any"></div>
+                        <div class="col-6"><label class="form-label">Accès</label><input class="form-control" name="acces"></div>
+                        <div class="col-12"><label class="form-label">Accessibilité PMR</label><input class="form-control" name="pmr"></div>
+                        <div class="col-12"><label class="form-label">Tarification</label><input class="form-control" name="tarification"></div>
+                        <div class="col-12 form-check ms-2">
+                            <input class="form-check-input" type="checkbox" name="gratuit" id="edit-gratuit">
+                            <label class="form-check-label" for="edit-gratuit">Gratuit</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-secondaire" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-principal">Enregistrer</button>
                 </div>
             </form>
         </div>

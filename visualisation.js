@@ -9,9 +9,10 @@ const couche = L.layerGroup().addTo(map);
 
 const API = 'php/request.php';
 const LIGNES_PAR_PAGE = 14;
-let bornes = [];
-let lignesFiltrees = [];   
+let bornes = [];        // toutes les stations (pour la carte + repli local du tableau)
 let pageCourante = 1;
+let apiOk = false;      // vrai si l'API PHP repond (sinon repli sur data/bornes.js)
+let lignesAffichees = [];   // points de charge de la page de tableau actuellement affichee
 
 // GET : recupere des donnees JSON depuis le serveur.
 async function getData(url) {
@@ -64,42 +65,66 @@ function afficherCarte(liste) {
         liste.length.toLocaleString('fr-FR') + (liste.length > 1 ? ' bornes affichées' : ' borne affichée');
 }
 
-// Affichage dans le TABLEAU avec pagination
-function afficherTableau(liste) {
-    lignesFiltrees = liste;
-    pageCourante = 1;
-    rendreTableau();
-}
-
-function rendreTableau() {
-    const total = lignesFiltrees.length;
-    const nbPages = Math.max(1, Math.ceil(total / LIGNES_PAR_PAGE));
-    if (pageCourante > nbPages) pageCourante = nbPages;
-
-    const debut = (pageCourante - 1) * LIGNES_PAR_PAGE;
-    const page = lignesFiltrees.slice(debut, debut + LIGNES_PAR_PAGE);
-
+// Construit les lignes du tableau a partir d'une liste de points de charge.
+function afficherLignesTableau(lignes) {
+    lignesAffichees = lignes;
     const tbody = document.querySelector('#tableau-bornes tbody');
     tbody.innerHTML = '';
-    page.forEach(b => {
+    lignes.forEach((b, i) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-            <td><input class="form-check-input" type="radio" name="sel-borne" value="${b.id || b.nom || ''}"></td>
-            <td>${b.nom || ''}</td>
+            <td><input class="form-check-input" type="radio" name="sel-borne" value="${b.id || ''}"></td>
+            <td>${b.station || b.nom || ''}</td>
             <td>${b.commune || ''}</td>
             <td>${b.cp || ''}</td>
             <td>${b.operateur || ''}</td>
             <td>${b.puissance != null ? b.puissance + ' kW' : '?'}</td>
-            <td>${b.nb_pdc || 1}</td>
-            <td>${b.acces || ''}</td>`;
+            <td>${b.acces || ''}</td>
+            <td>${b.gratuit ? 'Oui' : 'Non'}</td>
+            <td>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><button class="dropdown-item" data-action="modifier" data-index="${i}"><i class="fa-solid fa-pen"></i> Modifier</button></li>
+                        <li><button class="dropdown-item text-danger" data-action="supprimer" data-index="${i}"><i class="fa-solid fa-trash"></i> Supprimer</button></li>
+                    </ul>
+                </div>
+            </td>`;
         tbody.appendChild(tr);
     });
-
-    rendrePagination(nbPages, total);
 }
 
-// Boutons Precedent / Suivant + indication de page
-function rendrePagination(nbPages, total) {
+// Charge UNE page du tableau.
+async function chargerPageTableau(page) {
+    if (page < 1) page = 1;
+    pageCourante = page;
+    const offset = (page - 1) * LIGNES_PAR_PAGE;
+
+    let total = 0;
+    let lignes = [];
+    if (apiOk) {
+        const reponse = await getData(API + '/points-charge/?limit=' + LIGNES_PAR_PAGE + '&offset=' + offset);
+        if (reponse) {
+            total = reponse.total;
+            lignes = reponse.lignes;
+        }
+    } else {
+        // Pas de serveur : on retombe sur les stations locales (vue dégradée).
+        total = bornes.length;
+        lignes = bornes.slice(offset, offset + LIGNES_PAR_PAGE);
+    }
+
+    afficherLignesTableau(lignes);
+    rendrePagination(total);
+}
+
+// Boutons Precedent / Suivant + total. Chaque clic recharge la page voulue.
+function rendrePagination(total) {
+    const nbPages = Math.max(1, Math.ceil(total / LIGNES_PAR_PAGE));
+    if (pageCourante > nbPages) pageCourante = nbPages;
+
     const pag = document.getElementById('pagination');
     pag.innerHTML = '';
 
@@ -108,7 +133,7 @@ function rendrePagination(nbPages, total) {
         b.className = 'btn btn-sm btn-outline-secondary';
         b.textContent = texte;
         b.disabled = !actif;
-        b.addEventListener('click', () => { pageCourante = page; rendreTableau(); });
+        b.addEventListener('click', () => chargerPageTableau(page));
         return b;
     };
 
@@ -123,7 +148,45 @@ function rendrePagination(nbPages, total) {
         `${total.toLocaleString('fr-FR')} résultat${total > 1 ? 's' : ''}`;
 }
 
-// Filtre commun a la carte et au tableau
+// Clic sur un item du menu "..." d'une ligne (un seul ecouteur pour tout le tableau).
+document.querySelector('#tableau-bornes tbody').addEventListener('click', function (e) {
+    const item = e.target.closest('.dropdown-item');
+    if (!item) return;
+    const borne = lignesAffichees[item.dataset.index];
+    if (!borne) return;
+    if (item.dataset.action === 'modifier') {
+        modifier(borne);
+    } else if (item.dataset.action === 'supprimer') {
+        supprimer(borne);
+    }
+});
+
+// Supprime un point de charge (DELETE points-charge) puis rafraichit le tableau.
+async function supprimer(borne) {
+    if (!confirm('Supprimer ce point de charge ?')) return;
+    if (apiOk && borne.id) {
+        await fetch(API + '/points-charge/?id_pdc_itinerance=' + encodeURIComponent(borne.id), { method: 'DELETE' });
+    } else {
+        // Repli local : on enleve la ligne de la liste en memoire.
+        bornes = bornes.filter(b => b !== borne);
+        afficherCarte(bornes);
+    }
+    chargerPageTableau(pageCourante);
+}
+
+// Ouvre le modal d'edition pre-rempli avec le point de charge.
+function modifier(borne) {
+    const f = document.getElementById('form-edit');
+    f.id.value = borne.id || '';
+    f.puissance.value = borne.puissance ?? '';
+    f.acces.value = borne.acces || '';
+    f.pmr.value = borne.pmr || '';
+    f.tarification.value = borne.tarification || '';
+    f.gratuit.checked = Boolean(borne.gratuit);
+    new bootstrap.Modal(document.getElementById('modalEdit')).show();
+}
+
+// Filtre de la CARTE (le tableau, lui, est paginé côté serveur, indépendamment).
 function filtrer() {
     const q = document.getElementById('rech-commune').value.trim().toLowerCase();
     const op = document.getElementById('filtre-operateur').value;
@@ -135,7 +198,6 @@ function filtrer() {
         return true;
     });
     afficherCarte(res);
-    afficherTableau(res);
 }
 
 function remplirControles() {
@@ -161,7 +223,7 @@ document.getElementById('btn-cluster').addEventListener('click', function (e) {
     window.location.href = 'cluster.html?id=' + encodeURIComponent(choix.value);
 });
 
-// Ajout d'une borne : envoi a l'API (POST) + affichage immediat.
+// Ajout d'une borne : cree une station + un point de charge (POST), affichage immediat.
 document.getElementById('form-ajout').addEventListener('submit', function (e) {
     e.preventDefault();
     const f = e.target;
@@ -170,34 +232,62 @@ document.getElementById('form-ajout').addEventListener('submit', function (e) {
         lat: parseFloat(f.lat.value), lon: parseFloat(f.lon.value),
         puissance: parseFloat(f.puissance.value) || 0, acces: f.acces.value, gratuit: false, nb_pdc: 1
     };
-    // Envoi a l'API (POST en x-www-form-urlencoded
+    // Envoi a l'API (POST en x-www-form-urlencoded, cf. cours).
     sendData(API + '/points-charge/', new URLSearchParams({
         nom: b.nom, commune: b.commune, operateur: b.operateur,
         lat: b.lat, lon: b.lon, puissance: b.puissance, acces: b.acces
     }).toString());
 
     bornes.push(b);
-    filtrer();
+    filtrer();                          // maj de la carte
+    chargerPageTableau(pageCourante);   // maj du tableau
     map.setView([b.lat, b.lon], 13);
     bootstrap.Modal.getInstance(document.getElementById('modalAjout')).hide();
     f.reset();
 });
 
-function demarrer(data) {
-    bornes = Array.isArray(data) ? data : [];
-    remplirControles();
-    filtrer();
-}
+// Modification d'un point de charge (PUT points-charge?id_pdc_itinerance=...).
+document.getElementById('form-edit').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const f = e.target;
+    if (apiOk && f.id.value) {
+        await fetch(API + '/points-charge/?id_pdc_itinerance=' + encodeURIComponent(f.id.value), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                puissance: f.puissance.value || null,   // vide -> NULL (colonne DECIMAL)
+                acces: f.acces.value,
+                pmr: f.pmr.value,
+                tarification: f.tarification.value,
+                gratuit: f.gratuit.checked ? 1 : 0
+            })
+        });
+    }
+    bootstrap.Modal.getInstance(document.getElementById('modalEdit')).hide();
+    chargerPageTableau(pageCourante);
+});
 
-// Chargement : on tente l'API (getData, cf. cours) ; si echec (ouverture en
-// local sans serveur), on bascule sur les donnees statiques data/bornes.js.
+// Chargement initial :
+// - la CARTE a besoin de toutes les stations -> un seul appel (ou data/bornes.js en local) ;
+// - le TABLEAU ne charge ensuite qu'une page a la fois (cote serveur).
 async function charger() {
-    let data;
+    let stations;
     try {
-        data = await getData(API + '/stations/');
+        stations = await getData(API + '/stations/');
     } catch (e) {
         console.warn('API injoignable, donnees locales utilisees.', e);
     }
-    demarrer(data || window.BORNES || []);
+
+    if (Array.isArray(stations)) {
+        apiOk = true;
+        bornes = stations;
+    } else {
+        apiOk = false;                  // pas de serveur -> repli local
+        bornes = window.BORNES || [];
+    }
+
+    remplirControles();
+    afficherCarte(bornes);              // carte : toutes les bornes
+    chargerPageTableau(1);              // tableau : 1re page
 }
 charger();
