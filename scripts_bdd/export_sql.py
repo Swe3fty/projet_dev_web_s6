@@ -37,6 +37,11 @@ df["lat"] = pd.to_numeric(coords[1], errors="coerce")
 df = df.dropna(subset=["id_station_itinerance", "id_pdc_itinerance",
                        "code_insee_commune"])
 
+# le CSV préfixe par "tel:" -> on l'enlève (pour rentrer dans VARCHAR(20)).
+df["telephone_operateur"] = df["telephone_operateur"].str.replace("tel:", "", regex=False)
+
+# Tarification : texte parfois > 255 caractères -> on enlève la suite (colonne VARCHAR(255)).
+df["tarification"] = df["tarification"].str.slice(0, 255)
 # --- Les 8 tables ---
 type_prise = pd.DataFrame(
     {"type_prise": ["EF", "Type 2", "Combo CCS", "CHAdeMO", "Autre"]})
