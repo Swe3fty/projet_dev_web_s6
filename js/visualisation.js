@@ -10,7 +10,6 @@ const couche = L.layerGroup().addTo(map);
 const API = 'php/request.php';
 const LIGNES_PAR_PAGE = 14;
 let bornes = [];        // toutes les stations (pour la carte + repli local du tableau)
-let bornesFiltrees = [];
 let pageCourante = 1;
 let apiOk = false;      // vrai si l'API PHP repond (sinon repli sur data/bornes.js)
 let lignesAffichees = [];   // points de charge de la page de tableau actuellement affichee
@@ -120,14 +119,7 @@ async function chargerPageTableau(page) {
     afficherLignesTableau(lignes);
     rendrePagination(total);
 }
-function afficherPageFiltree(page) {
-    pageCourante = page;
-    const debut = (page - 1) * LIGNES_PAR_PAGE;
-    const fin = debut + LIGNES_PAR_PAGE;
 
-    afficherLignesTableau(bornesFiltrees.slice(debut, fin));
-    rendrePagination(bornesFiltrees.length);
-}
 // Boutons Precedent / Suivant + total. Chaque clic recharge la page voulue.
 function rendrePagination(total) {
     const nbPages = Math.max(1, Math.ceil(total / LIGNES_PAR_PAGE));
@@ -141,11 +133,7 @@ function rendrePagination(total) {
         b.className = 'btn btn-sm btn-outline-secondary';
         b.textContent = texte;
         b.disabled = !actif;
-        b.addEventListener('click', () => {
-            const filtreActif = bornesFiltrees.length !== bornes.length;
-            if (filtreActif) afficherPageFiltree(page);
-            else chargerPageTableau(page);
-        });
+        b.addEventListener('click', () => chargerPageTableau(page));
         return b;
     };
 
@@ -209,9 +197,7 @@ function filtrer() {
         if (pu && categorie(b.puissance) !== pu) return false;
         return true;
     });
-    bornesFiltrees = res;
     afficherCarte(res);
-    afficherPageFiltree(1);
 }
 
 function remplirControles() {
@@ -295,15 +281,44 @@ async function charger() {
     if (Array.isArray(stations)) {
         apiOk = true;
         bornes = stations;
-        bornesFiltrees = bornes;
     } else {
         apiOk = false;                  // pas de serveur -> repli local
         bornes = window.BORNES || [];
-        bornesFiltrees = bornes;
     }
 
     remplirControles();
     afficherCarte(bornes);              // carte : toutes les bornes
     chargerPageTableau(1);              // tableau : 1re page
 }
+
+// Bouton "Prédire l'implantation" : on envoie vers prediction.html avec la borne sélectionnée.
+document.getElementById('btn-implantation').addEventListener('click', function (e) {
+    e.preventDefault(); // Empêche le lien HTML classique de s'exécuter
+    
+    // On cherche le bouton radio qui est coché
+    const choix = document.querySelector('input[name="sel-borne"]:checked');
+    
+    if (!choix) {
+        alert('Sélectionnez une borne dans le tableau (bouton radio) avant de prédire.');
+        return;
+    }
+    
+    // On redirige vers la bonne page en ajoutant l'ID à la fin de l'URL
+    window.location.href = 'prediction.html?id=' + encodeURIComponent(choix.value);
+});
+
+document.getElementById('btn-puissance').addEventListener('click', function (e) {
+    e.preventDefault(); 
+    
+    const choix = document.querySelector('input[name="sel-borne"]:checked');
+    
+    if (!choix) {
+        alert('Sélectionnez une borne dans le tableau (bouton radio) avant de prédire.');
+        return;
+    }
+    
+    // On redirige vers la page puissance.html en passant l'ID dans l'URL
+    window.location.href = 'puissance.html?id=' + encodeURIComponent(choix.value);
+});
+
 charger();
