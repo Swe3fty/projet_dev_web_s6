@@ -1,183 +1,122 @@
 <?php
-require_once('database.php');
+  require_once('database.php');
 
-// =========================
-// Connexion DB
-// =========================
-$db = dbConnect();
-
-if (!$db) {
-    http_response_code(500);
+  // Connexion à la base de données.
+  $db = dbConnect();
+  if (!$db) {
     header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(["error" => "DB connection failed"]);
+    http_response_code(500);
+    echo json_encode(['erreur' => 'Connexion a la base impossible']);
     exit;
-}
+  }
 
-// =========================
-// REQUEST INFO
-// =========================
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-$action = $_GET['action'] ?? null;
+  // Analyse de la requête (méthode + ressource via PATH_INFO).
+  $requestMethod    = $_SERVER['REQUEST_METHOD'];
+  $request          = substr($_SERVER['PATH_INFO'] ?? '', 1);
+  $request          = explode('/', $request);
+  $requestRessource = array_shift($request);
+  $subRessource     = array_shift($request);
 
-// PATH_INFO SAFE
-$pathInfo = $_SERVER['PATH_INFO'] ?? '';
-$pathInfo = trim($pathInfo, '/');
-$parts = $pathInfo !== '' ? explode('/', $pathInfo) : [];
-
-$requestRessource = $parts[0] ?? null;
-$subRessource = $parts[1] ?? null;
-
-// =========================
-// INPUT (POST/PUT JSON ou form-data)
-// =========================
-$input = $_POST;
-if (empty($input)) {
-    $input = json_decode(file_get_contents("php://input"), true);
-}
-if (!$input) {
+  // Données envoyées par le client (POST/PUT).
+  // On prend d'abord le format formulaire ($_POST) ; sinon on lit le corps JSON.
+  $input = $_POST;
+  if (empty($input)) {
+    $input = json_decode(file_get_contents('php://input'), true);
+  }
+  if (!$input) {
     $input = [];
-}
+  }
 
-// =========================
-// INIT
-// =========================
-$data = false;
-$code = 200;
+  $data = false;
+  $code = 200;
 
-// =======================================================
-// GET ROUTES
-// =======================================================
-if ($requestMethod === 'GET') {
+  //--- GET : lecture des données ---
+  if ($requestMethod == 'GET') {
 
-    if ($requestRessource === 'stations') {
-        $data = getStations($db);
+    if ($requestRessource == 'stations') {
+      // Toutes les stations (pour la carte).
+      $data = getStations($db);
     }
-
-    elseif ($requestRessource === 'points-charge') {
-
-        if (isset($_GET['limit'])) {
-            $limit = (int) $_GET['limit'];
-            $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
-            $data = getPointsChargePage($db, $limit, $offset);
-        } else {
-            $data = getPointsCharge($db);
+    elseif ($requestRessource == 'points-charge') {
+      if (isset($_GET['limit'])) {
+        // Une page de points de charge (pour le tableau) : ?limit=...&offset=...
+        $offset = 0;
+        if (isset($_GET['offset'])) {
+          $offset = (int) $_GET['offset'];
         }
+        $data = getPointsChargePage($db, (int) $_GET['limit'], $offset);
+      } else {
+        // Tous les points de charge.
+        $data = getPointsCharge($db);
+      }
     }
-
-    elseif ($requestRessource === 'communes' && $subRessource === 'departements') {
-        $data = getDepartements($db);
+    elseif ($requestRessource == 'communes' && $subRessource == 'departements') {
+      $data = getDepartements($db);
     }
-
-    elseif ($requestRessource === 'statistiques') {
-
-        $departement = $_GET['departement'] ?? null;
-
-        if (!$departement) {
-            http_response_code(400);
-            echo json_encode(["error" => "departement missing"]);
-            exit;
-        }
-
-        $data = getStatistiques($db, $departement);
+    elseif ($requestRessource == 'statistiques') {
+      if (isset($_GET['departement'])) {
+        $data = getStatistiques($db, $_GET['departement']);
+      } else {
+        $code = 400;
+      }
     }
-}
+  }
 
-// =======================================================
-// POST ROUTES
-// =======================================================
-elseif ($requestMethod === 'POST') {
+  //--- POST : création ---
+  elseif ($requestMethod == 'POST') {
 
-    // =========================
-    // POINTS CHARGE
-    // =========================
-    if ($requestRessource === 'points-charge') {
-
-        $data = addPointDeCharge($db, $input);
-
-        if ($data !== false) {
-            $code = 201;
-        } else {
-            $code = 500;
-        }
+    if ($requestRessource == 'points-charge') {
+      $data = addPointDeCharge($db, $input);
+      if ($data !== false) {
+        $code = 201;
+      } else {
+        $code = 500;
+      }
     }
-
-    // =========================
-    // PREDICTION CLUSTERS (PYTHON)
-    // =========================
-    elseif ($action === 'predictions_clusters') {
-
-        if (!isset($input['borne_ids']) || empty($input['borne_ids'])) {
-            http_response_code(400);
-            echo json_encode(["error" => "borne_ids manquant"]);
-            exit;
-        }
-
-        $ids = array_map('intval', $input['borne_ids']);
-        $idsString = implode(',', $ids);
-
-        // IMPORTANT : chemin python (adapter si besoin)
-        $python = "python3 ../python/predict_clusters.py " . $idsString;
-
-        $output = shell_exec($python);
-
-        if (!$output) {
-            http_response_code(500);
-            echo json_encode(["error" => "Python failed"]);
-            exit;
-        }
-
-        header('Content-Type: application/json; charset=utf-8');
-        echo $output;
-        exit;
+    elseif ($requestRessource == 'predictions') {
+      $code = 501;
     }
-}
+  }
 
-// =======================================================
-// PUT ROUTES
-// =======================================================
-elseif ($requestMethod === 'PUT') {
+  //--- PUT : modification ---
+  elseif ($requestMethod == 'PUT') {
 
-    if ($requestRessource === 'points-charge') {
-
-        $id = $_GET['id_pdc_itinerance'] ?? null;
-        $data = updatePointDeCharge($db, $id, $input);
-
-        if ($data === false) {
-            $code = 500;
-        }
+    if ($requestRessource == 'points-charge') {
+      $id = $_GET['id_pdc_itinerance'] ?? '';
+      $data = updatePointDeCharge($db, $id, $input);
+      if ($data === false) {
+        $code = 500;
+      }
     }
-}
+  }
 
-// =======================================================
-// DELETE ROUTES
-// =======================================================
-elseif ($requestMethod === 'DELETE') {
+  //--- DELETE : suppression ---
+  elseif ($requestMethod == 'DELETE') {
 
-    if ($requestRessource === 'points-charge') {
-
-        $id = $_GET['id_pdc_itinerance'] ?? null;
-        $data = deletePointDeCharge($db, $id);
-
-        if ($data === false) {
-            $code = 500;
-        }
+    if ($requestRessource == 'points-charge') {
+      $id = $_GET['id_pdc_itinerance'] ?? '';
+      $data = deletePointDeCharge($db, $id);
+      if ($data === false) {
+        $code = 500;
+      }
     }
-}
+  }
 
-// =======================================================
-// RESPONSE
-// =======================================================
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-control: no-store, no-cache, must-revalidate');
-header('Pragma: no-cache');
+  // Réponse au client.
+  header('Content-Type: application/json; charset=utf-8');
+  header('Cache-control: no-store, no-cache, must-revalidate');
+  header('Pragma: no-cache');
 
-if ($data !== false) {
+  if ($data !== false) {
     http_response_code($code);
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
     exit;
-}
+  }
 
-http_response_code($code ?: 404);
-echo json_encode(["error" => "Bad request"]);
-exit;
+  // Pas de données : si aucune route n'a correspondu, c'est une 404.
+  if ($code == 200) {
+    $code = 404;
+  }
+  http_response_code($code);
+  echo json_encode(['erreur' => 'Requete invalide']);
 ?>
