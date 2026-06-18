@@ -1,3 +1,4 @@
+
 const map = L.map('map', { preferCanvas: true }).setView([46.6, 2.5], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
     maxZoom: 19,
@@ -290,40 +291,3 @@ async function charger() {
     chargerPageTableau(1);              // tableau : 1re page
 }
 charger();
-
-
-// Pour récupérer les id des bornes à prédire
-
-document.getElementById('btn-cluster').addEventListener('click', function (e) {
-    e.preventDefault();
-
-    // récupérer les radios cochés dans le tableau
-    const choix = document.querySelectorAll('input[name="sel-borne"]:checked');
-
-    const ids = Array.from(choix).map(c => parseInt(c.value));
-
-    if (ids.length === 0) {
-        alert('Sélectionnez au moins une borne');
-        return;
-    }
-
-    fetch("/php/request.php?action=predictions_clusters", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            borne_ids: ids
-        })
-    })
-    .then(r => r.json())
-    .then(data => {
-
-        console.log("Clusters reçus :", data);
-
-        localStorage.setItem("clusters", JSON.stringify(data));
-
-        window.location.href = "cluster.html";
-    })
-    .catch(err => console.error(err));
-});
