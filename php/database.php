@@ -105,6 +105,7 @@
   //----------------------------------------------------------------------------
   // Statistiques des stations d'un département
   function getStatistiques($db, $departement){
+    $deptParam = $departement . '%'; // pour le LIKE
     try {
         $query = 'SELECT COUNT(DISTINCT s.id_station_itinerance) AS nb_stations,
                          COUNT(p.id_pdc_itinerance)              AS nb_points_charge,
@@ -259,4 +260,4 @@
     return ['ok' => true];
   }
 
-?>
+
