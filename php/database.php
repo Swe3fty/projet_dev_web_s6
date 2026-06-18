@@ -109,7 +109,7 @@
         $query = 'SELECT COUNT(DISTINCT s.id_station_itinerance) AS nb_stations,
                          COUNT(p.id_pdc_itinerance)              AS nb_points_charge,
                          ROUND(AVG(p.puissance_nominale), 1)     AS puissance_moyenne,
-                         SUM(p.gratuit = 1)                      AS nb_gratuit
+                         COUNT(DISTINCT s.id_operateur)          AS nb_operateurs
                   FROM station s
                   JOIN commune c ON c.code_insee_commune = s.code_insee_commune
                   LEFT JOIN point_de_charge p ON p.id_station_itinerance = s.id_station_itinerance
