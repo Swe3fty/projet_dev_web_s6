@@ -296,4 +296,40 @@
     return ['ok' => true];
   }
 
+
+  //----------------------------------------------------------------------------
+  // Récupération des points nécessaires pour la prédiction des clusters.
+  // Le modèle KMeans utilise la latitude et la longitude.
+  function getPointsForClusters($db) {
+    try {
+        $query = 'SELECT p.id_pdc_itinerance AS id,
+                         s.nom_station AS station,
+                         c.nom_commune AS commune,
+                         o.nom_operateur AS operateur,
+                         p.puissance_nominale AS puissance,
+                         s.lat AS latitude,
+                         s.`long` AS longitude
+                  FROM point_de_charge p
+                  INNER JOIN station s ON s.id_station_itinerance = p.id_station_itinerance
+                  LEFT JOIN commune c ON c.code_insee_commune = s.code_insee_commune
+                  LEFT JOIN operateur o ON o.id_operateur = s.id_operateur
+                  WHERE s.lat IS NOT NULL
+                    AND s.`long` IS NOT NULL
+                  ORDER BY p.id_pdc_itinerance';
+        $stmt = $db->prepare($query);
+        $stmt->execute();
+    } catch (PDOException $exception) {
+        error_log('Erreur SQL (points pour clusters) '.$exception->getMessage());
+        return false;
+    }
+
+    $points = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($points as &$p) {
+        $p['latitude'] = (float) $p['latitude'];
+        $p['longitude'] = (float) $p['longitude'];
+        $p['puissance'] = $p['puissance'] !== null ? (float) $p['puissance'] : null;
+    }
+    return $points;
+  }
+
 ?>

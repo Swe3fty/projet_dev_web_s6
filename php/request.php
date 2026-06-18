@@ -1,8 +1,10 @@
 <?php
-// Affichage des erreurs pour le débug (tu peux le passer à 0 une fois en prod)
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+// Sécurité mémoire
+ini_set('memory_limit', '512M');
 
 require_once('database.php');
 
@@ -14,14 +16,12 @@ if (!$db) {
     exit;
 }
 
-// Analyse de la requête
 $requestMethod    = $_SERVER['REQUEST_METHOD'];
 $request          = substr($_SERVER['PATH_INFO'] ?? '', 1);
 $request          = explode('/', $request);
 $requestRessource = array_shift($request);
 $subRessource     = array_shift($request);
 
-// Données entrantes
 $input = $_POST;
 if (empty($input)) {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -33,7 +33,7 @@ if (!$input) {
 $data = false;
 $code = 200;
 
-// --- REQUÊTES GET ---
+// --- GET ---
 if ($requestMethod == 'GET') {
     if ($requestRessource == 'stations') {
         $data = getStations($db);
@@ -55,33 +55,87 @@ if ($requestMethod == 'GET') {
     }
 }
 
-// --- REQUÊTES POST ---
+// --- POST ---
 elseif ($requestMethod == 'POST') {
     if ($requestRessource == 'points-charge') {
         $data = addPointDeCharge($db, $input);
         $code = ($data !== false) ? 201 : 500;
-    } 
-    // Bloc Prédiction (IA)
+    }
+
+    // --- CLUSTERS ---
+    elseif ($requestRessource == 'predictions' && $subRessource == 'clusters') {
+        $points = getPointsForClusters($db);
+
+        if ($points === false || empty($points)) {
+            $code = 500;
+            $data = ['erreur' => 'Impossible de récupérer les points pour les clusters'];
+        } else {
+            $tempDir = sys_get_temp_dir();
+            $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . 'clusters_' . uniqid() . '.json';
+
+            file_put_contents($tempFilePath, json_encode($points, JSON_UNESCAPED_UNICODE));
+
+            $scriptPath = realpath(__DIR__ . '/../scripts/cluster.py');
+
+            if (!$scriptPath) {
+                $code = 500;
+                $data = ['erreur' => 'Script cluster.py introuvable'];
+            } else {
+                $pythonExe = 'python3';
+
+                $command = $pythonExe . ' '
+                    . escapeshellarg($scriptPath)
+                    . ' --file '
+                    . escapeshellarg($tempFilePath)
+                    . ' 2>&1';
+
+                $output = shell_exec($command);
+
+                if (file_exists($tempFilePath)) {
+                    unlink($tempFilePath);
+                }
+
+                $result = json_decode($output, true);
+
+                if (!$result || (isset($result['status']) && $result['status'] === 'error')) {
+                    $code = 500;
+                    $data = [
+                        'erreur' => 'Erreur IA clusters',
+                        'details' => $output
+                    ];
+                } else {
+                    $data = $result;
+                }
+            }
+        }
+    }
+
+    // --- IMPLANTATION ---
     elseif ($requestRessource == 'predictions' && $subRessource == 'implantation') {
         $id = $input['id'] ?? null;
+
         if (!$id) {
             $code = 400;
         } else {
             $pdcData = getPointChargeById($db, $id);
+
             if (!$pdcData) {
                 $code = 404;
             } else {
-                // Utilisation du dossier temporaire système pour éviter les problèmes de droits
                 $tempDir = sys_get_temp_dir();
                 $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . 'temp_' . md5($id) . '.json';
                 file_put_contents($tempFilePath, json_encode($pdcData, JSON_UNESCAPED_UNICODE));
 
                 $scriptsDir = realpath(__DIR__ . '/../scripts');
-                $pythonExe = "C:\\Users\\gaspa\\AppData\\Local\\Programs\\Python\\Python313\\python.exe";
+                $pythonExe = 'python3';
                 $scriptPath = $scriptsDir . DIRECTORY_SEPARATOR . 'implantation.py';
 
-                // Exécution de l'IA
-                $command = '"' . $pythonExe . '" "' . $scriptPath . '" --file "' . $tempFilePath . '" 2>&1';
+                $command = $pythonExe . ' '
+                    . escapeshellarg($scriptPath)
+                    . ' --file '
+                    . escapeshellarg($tempFilePath)
+                    . ' 2>&1';
+
                 $output = shell_exec($command);
 
                 if (file_exists($tempFilePath)) {
@@ -89,6 +143,7 @@ elseif ($requestMethod == 'POST') {
                 }
 
                 $predictionResult = json_decode($output, true);
+
                 if (!$predictionResult || (isset($predictionResult['status']) && $predictionResult['status'] == 'error')) {
                     $code = 500;
                     $data = ['erreur' => 'Erreur IA', 'details' => $output];
@@ -100,7 +155,7 @@ elseif ($requestMethod == 'POST') {
     }
 }
 
-// --- REQUÊTES PUT ---
+// --- PUT ---
 elseif ($requestMethod == 'PUT') {
     if ($requestRessource == 'points-charge') {
         $id = $_GET['id_pdc_itinerance'] ?? '';
@@ -111,7 +166,7 @@ elseif ($requestMethod == 'PUT') {
     }
 }
 
-// --- REQUÊTES DELETE ---
+// --- DELETE ---
 elseif ($requestMethod == 'DELETE') {
     if ($requestRessource == 'points-charge') {
         $id = $_GET['id_pdc_itinerance'] ?? '';
@@ -122,7 +177,6 @@ elseif ($requestMethod == 'DELETE') {
     }
 }
 
-// --- RÉPONSE AU CLIENT ---
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');
