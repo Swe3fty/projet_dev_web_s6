@@ -58,6 +58,48 @@
 
 
   //----------------------------------------------------------------------------
+  // Récupération d'UNE page de points de charge (pour le tableau paginé côté serveur).
+  // Renvoie ['total' => nombre total de points de charge, 'lignes' => la page].
+  function getPointsChargePage($db, $limit, $offset) {
+    try {
+        // Nombre total de points de charge (pour calculer le nombre de pages).
+        $total = $db->query('SELECT COUNT(*) FROM point_de_charge')->fetchColumn();
+
+        // La page demandée : le point de charge + sa station / commune / opérateur.
+        $query = 'SELECT p.id_pdc_itinerance AS id,
+                         s.nom_station        AS station,
+                         c.nom_commune        AS commune,
+                         c.code_postal        AS cp,
+                         o.nom_operateur      AS operateur,
+                         p.puissance_nominale AS puissance,
+                         p.condition_acces    AS acces,
+                         p.accessibilite_pmr  AS pmr,
+                         p.tarification       AS tarification,
+                         p.gratuit            AS gratuit
+                  FROM point_de_charge p
+                  LEFT JOIN station s   ON s.id_station_itinerance = p.id_station_itinerance
+                  LEFT JOIN commune c   ON c.code_insee_commune = s.code_insee_commune
+                  LEFT JOIN operateur o ON o.id_operateur       = s.id_operateur
+                  ORDER BY p.id_pdc_itinerance
+                  LIMIT :limit OFFSET :offset';
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
+        $stmt->execute();
+    } catch (PDOException $exception) {
+        error_log('Erreur SQL (points-charge page)'.$exception->getMessage());
+        return false;
+    }
+    $lignes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($lignes as &$pdc) {
+        $pdc['puissance'] = $pdc['puissance'] !== null ? (float) $pdc['puissance'] : null;
+        $pdc['gratuit']   = (bool) $pdc['gratuit'];
+    }
+    return ['total' => (int) $total, 'lignes' => $lignes];
+  }
+
+
+  //----------------------------------------------------------------------------
   // Récupération des points de charge (pour le tableau, avec pagination optionnelle)
   function getPointsCharge($db, $limit = null, $offset = 0) {
     try {
@@ -103,7 +145,7 @@
 
 
   //----------------------------------------------------------------------------
-  // Statistiques des stations d'un département
+  // Statistiques des stations d'un département (totaux + détails pour les graphiques)
   function getStatistiques($db, $departement){
     $deptParam = $departement . '%'; // pour le LIKE
     try {
@@ -120,7 +162,7 @@
         $stmt->execute();
         $totaux = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // Stations par type d'implantation pour département
+        // Stations par type d'implantation
         $queryImplantation = 'SELECT s.implantation_station, COUNT(DISTINCT s.id_station_itinerance) AS nb
             FROM station s
             INNER JOIN commune c ON s.code_insee_commune = c.code_insee_commune
@@ -132,8 +174,7 @@
         $stmt->execute();
         $parImplantation = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-        // Répartitions des puissances pour département
+        // Répartition des puissances
         $queryPuissances = "SELECT
         CASE
             WHEN pdc.puissance_nominale <= 7.4 THEN '≤ 7,4 kW'
@@ -148,38 +189,33 @@
         INNER JOIN commune c ON s.code_insee_commune = c.code_insee_commune
         WHERE c.code_postal LIKE :departement
         GROUP BY tranche";
-
         $stmt = $db->prepare($queryPuissances);
         $stmt->bindValue(':departement', $deptParam);
         $stmt->execute();
         $repartitionPuissances = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // Top 5 opérateurs
-        $queryTopOperateurs = "
-            SELECT o.nom_operateur, COUNT(DISTINCT s.id_station_itinerance) AS nb
+        $queryTopOperateurs = "SELECT o.nom_operateur, COUNT(DISTINCT s.id_station_itinerance) AS nb
             FROM operateur o
             INNER JOIN station s ON s.id_operateur = o.id_operateur
             INNER JOIN commune c ON s.code_insee_commune = c.code_insee_commune
             WHERE c.code_postal LIKE :departement
             GROUP BY o.nom_operateur
             ORDER BY nb DESC
-            LIMIT 5
-        ";
+            LIMIT 5";
         $stmt = $db->prepare($queryTopOperateurs);
         $stmt->bindValue(':departement', $deptParam);
         $stmt->execute();
         $topOperateurs = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
     } catch (PDOException $exception) {
         error_log('Erreur SQL (Statistiques)'.$exception->getMessage());
         return false;
     }
     return [
-        'totaux' => $totaux,
-        'par_implantation' => $parImplantation,
+        'totaux'                 => $totaux,
+        'par_implantation'       => $parImplantation,
         'repartition_puissances' => $repartitionPuissances,
-        'top_operateurs' => $topOperateurs
+        'top_operateurs'         => $topOperateurs
     ];
   }
 
@@ -260,4 +296,4 @@
     return ['ok' => true];
   }
 
-
+?>

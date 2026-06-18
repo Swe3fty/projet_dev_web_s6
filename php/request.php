@@ -34,28 +34,30 @@
   if ($requestMethod == 'GET') {
 
     if ($requestRessource == 'stations') {
+      // Toutes les stations (pour la carte).
       $data = getStations($db);
     }
     elseif ($requestRessource == 'points-charge') {
-      $limit = null;
       if (isset($_GET['limit'])) {
-        $limit = (int) $_GET['limit'];
+        // Une page de points de charge (pour le tableau) : ?limit=...&offset=...
+        $offset = 0;
+        if (isset($_GET['offset'])) {
+          $offset = (int) $_GET['offset'];
+        }
+        $data = getPointsChargePage($db, (int) $_GET['limit'], $offset);
+      } else {
+        // Tous les points de charge.
+        $data = getPointsCharge($db);
       }
-      $offset = 0;
-      if (isset($_GET['offset'])) {
-        $offset = (int) $_GET['offset'];
-      }
-      $data = getPointsCharge($db, $limit, $offset);
     }
     elseif ($requestRessource == 'communes' && $subRessource == 'departements') {
       $data = getDepartements($db);
     }
     elseif ($requestRessource == 'statistiques') {
-      $departement = $_GET['departement'] ?? null;
-      if ($departement == null) {
-        $code = 400;
+      if (isset($_GET['departement'])) {
+        $data = getStatistiques($db, $_GET['departement']);
       } else {
-        $data = getStatistiques($db, $departement);
+        $code = 400;
       }
     }
   }
@@ -116,5 +118,5 @@
     $code = 404;
   }
   http_response_code($code);
-  echo json_encode(['erreur' => 'Requete invalide ou introuvable']);
+  echo json_encode(['erreur' => 'Requete invalide']);
 ?>
