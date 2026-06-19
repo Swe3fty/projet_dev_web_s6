@@ -95,11 +95,19 @@ async function requestStatistiques(departement) {
 
 // Fonction pour afficher les statistiques dans les div correspondantes
 function displayStatistiques(data){
-    document.getElementById('total-stations').innerHTML = "<h1>" + data.totaux['nb_stations'] + "</h1>" + " Stations";
-    document.getElementById('nb-pdc').innerHTML = "<h1>" + data.totaux['nb_points_de_charge'] + "</h1>" + "Points de charge";
-    document.getElementById('puissance-moy').innerHTML = "<h1>" + Math.round(data.totaux['puissance_moyenne']) + "</h1>" + "Puissance Moyenne";
-    document.getElementById('nb-op').innerHTML = "<h1>" + data.totaux['nb_operateurs'] + "</h1>" + "Opérateurs";
+    const totaux = data.totaux;
 
+    document.getElementById('total-stations').innerHTML =
+        `<h1>${totaux.nb_stations}</h1> Stations`;
+
+    document.getElementById('nb-pdc').innerHTML =
+        `<h1>${totaux.nb_points_charge}</h1> Points de charge`;
+
+    document.getElementById('puissance-moy').innerHTML =
+        `<h1>${Math.round(Number(totaux.puissance_moyenne))}</h1> Puissance Moyenne`;
+
+    document.getElementById('nb-op').innerHTML =
+        `<h1>${totaux.nb_operateurs}</h1> Opérateurs`;
 }
 
 
