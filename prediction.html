@@ -17,7 +17,7 @@
 
 <body>
 
-<!--Navigation-->  
+<!--Navigation-->
 <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
     <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center gap-2" href="index.html">
@@ -40,28 +40,39 @@
 <!--Main-->
 <main class="content mt-5 pt-5">
     <div class="container my-3">
-        
+
         <div class="text-center mb-5">
-            <h1 class="fw-bold h1-montserrat">Prédiction implantation<br>et puissance nominale</h1>
+            <h1 class="fw-bold h1-montserrat">Prédiction implantation</h1>
             <p class="text-muted mt-3 fs-6">Comparaison des modèles de classification sur le point de charge sélectionné</p>
         </div>
 
+        <!-- Infos de la borne -->
         <div class="card border-0 mb-4 bg-light p-4 shadow-sm rounded-3">
             <h5 class="fw-bold mb-3">Point de charge analysé</h5>
             <p class="mb-3 text-muted fs-6" id="pdc-adresse">Lieu / Adresse</p>
-            <p class="mb-0 fw-medium fs-6" id="pdc-infos">ID · Puissance · Type prise · Opérateur</p>
+            <p class="mb-0 fw-medium fs-6" id="pdc-infos">ID · Puissance · Opérateur</p>
         </div>
 
+        <!-- Résultat Random Forest -->
         <div class="card border-0 mb-4 overflow-hidden rounded-3 bg-purple-light">
             <div class="p-4">
                 <h5 class="fw-bold mb-2">Méthode classification - Random Forest - sélectionné</h5>
-                <p class="mb-3 text-muted fs-6">Type d'implantation</p>
+                <p class="mb-3 text-muted fs-6">Type d'implantation prédit</p>
+                <div class="p-3 rounded bg-white text-center">
+                    <h4 class="fw-bold mb-0" id="implantation-predite">
+                        <i class="fa-solid fa-location-dot me-2"></i>
+                        Chargement...
+                    </h4>
+                </div>
             </div>
         </div>
 
+        <!-- Probabilités par classe -->
         <div class="card border-0 mb-5 bg-info-light p-4 rounded-3">
             <h5 class="fw-bold mb-3">Résumé des modèles et celui choisi</h5>
-            <p class="mb-3 fs-6" id="resume-accord">Accord entre les modèles</p>
+            <div id="zone-probabilites">
+                <p class="text-muted">Chargement des probabilités...</p>
+            </div>
         </div>
 
     </div>
@@ -69,15 +80,12 @@
 
 <!--Footer-->
 <footer id="footer">
-
-  <div class="text-center p-3" style="background-color:#0D2233; color:white;">
-    Isen Brest Yncréa - ©2026 <br>
-    Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
-  </div>
-
+    <div class="text-center p-3" style="background-color:#0D2233; color:white;">
+        Isen Brest Yncréa - ©2026 <br>
+        Maelenn Piat - Gaspard Vieujean - Manech Bourgeois
+    </div>
 </footer>
 
-<!--Chargement des scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
 <script src="js/prediction_implantation.js"></script>
 </body>

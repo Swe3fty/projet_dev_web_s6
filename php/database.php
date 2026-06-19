@@ -297,6 +297,51 @@
   }
 
 
+
+  function getPointChargeById($db, $id) {
+    try {
+        $query = 'SELECT p.id_pdc_itinerance    AS id,
+                         p.puissance_nominale    AS puissance,
+                         p.condition_acces       AS acces,
+                         p.accessibilite_pmr     AS pmr,
+                         p.gratuit               AS gratuit,
+                         s.nom_station           AS station,
+                         s.lat                   AS lat,
+                         s.`long`                AS lon,
+                         s.implantation_station  AS implantation_station,
+                         c.nom_commune           AS commune,
+                         c.code_postal           AS code_postal,
+                         o.nom_operateur         AS operateur,
+                         COUNT(p2.id_pdc_itinerance) AS nb_pdc
+                  FROM point_de_charge p
+                  LEFT JOIN station s    ON s.id_station_itinerance = p.id_station_itinerance
+                  LEFT JOIN commune c    ON c.code_insee_commune    = s.code_insee_commune
+                  LEFT JOIN operateur o  ON o.id_operateur          = s.id_operateur
+                  LEFT JOIN point_de_charge p2 ON p2.id_station_itinerance = s.id_station_itinerance
+                  WHERE p.id_pdc_itinerance = :id
+                  GROUP BY p.id_pdc_itinerance';
+        $stmt = $db->prepare($query);
+        $stmt->bindValue(':id', $id, PDO::PARAM_STR);
+        $stmt->execute();
+    } catch (PDOException $exception) {
+        error_log('Erreur SQL (getPointChargeById) ' . $exception->getMessage());
+        return false;
+    }
+
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row) return false;
+
+    $row['lat']       = (float) $row['lat'];
+    $row['lon']       = (float) $row['lon'];
+    $row['puissance'] = $row['puissance'] !== null ? (float) $row['puissance'] : null;
+    $row['gratuit']   = (bool) $row['gratuit'];
+    $row['nb_pdc']    = (int) $row['nb_pdc'];
+
+    return $row;
+  }
+
+
+
   //----------------------------------------------------------------------------
   // Récupération des points nécessaires pour la prédiction des clusters.
   // Le modèle KMeans utilise la latitude et la longitude.
