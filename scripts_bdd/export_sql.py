@@ -8,10 +8,17 @@ import pandas as pd
 
 # --- Lecture des 10 000 premieres lignes du CSV ---
 df = pd.read_csv(
-    "exportIA.csv", sep=";", encoding="cp1252", na_values="NA", nrows=10000,
-    dtype={"siren_amenageur": str, "code_insee_commune": str,
-           "consolidated_code_postal": str},
-    low_memory=False,
+    "exportIA.csv",
+    sep=",",
+    encoding="utf-8",
+    na_values="NA",
+    nrows=10000,
+    dtype={
+        "siren_amenageur": str,
+        "code_insee_commune": str,
+        "consolidated_code_postal": str
+    },
+    low_memory=False
 )
 df = df.rename(columns={"consolidated_commune": "nom_commune",
                         "consolidated_code_postal": "code_postal"})
