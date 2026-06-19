@@ -1,5 +1,8 @@
 'use strict';
 
+// Remplit la liste deroulante des departements et declenche la requete statistiques au choix.
+// (version proche de statistiques.js, sans la partie graphiques)
+
 requestDepartements();
 
 /* Requête pour la listes de départements*/

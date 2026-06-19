@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Script de prediction de la puissance d'une borne (categorie normale / acceleree / rapide).
+# Appele par PHP : lit un fichier JSON, applique le modele entraine et renvoie la prediction en JSON.
+
 import os
 import pandas as pd
 import joblib
@@ -10,6 +13,14 @@ CHEMIN_MODELE = os.path.join(DOSSIER, 'modele_puissance.pkl')
 
 bool_features = ['prise_type_ef', 'prise_type_2', 'prise_type_combo_ccs',
                  'prise_type_chademo', 'prise_type_autre', 'gratuit', 'station_deux_roues']
+
+# Le modele est livre compresse (.zip) : on l'extrait au premier appel si le .pkl manque.
+if not os.path.exists(CHEMIN_MODELE):
+    CHEMIN_ZIP = os.path.join(DOSSIER, 'modele_puissance.zip')
+    if os.path.exists(CHEMIN_ZIP):
+        import zipfile
+        with zipfile.ZipFile(CHEMIN_ZIP) as zf:
+            zf.extractall(DOSSIER)
 
 # Chargement du modèle
 try:

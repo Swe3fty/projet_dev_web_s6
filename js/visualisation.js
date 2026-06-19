@@ -1,3 +1,5 @@
+// Page Visualisation : carte Leaflet, filtres, tableau pagine et ajout/edition de bornes.
+// Dialogue avec l'API PHP (php/request.php) ; en cas d'absence de serveur, repli local.
 
 const map = L.map('map', { preferCanvas: true }).setView([46.6, 2.5], 6);
 L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
@@ -41,6 +43,7 @@ function categorie(p) {
     return 'normal';
 }
 
+// Construit le contenu HTML de la bulle affichee au clic sur un point de la carte.
 function popupHtml(b) {
     const gratuit = b.gratuit ? '<span style="color:#4BA037;">Gratuit</span>' : 'Payant';
     return `<div class="popup-borne">
@@ -61,8 +64,7 @@ function afficherCarte(liste) {
             radius: 5, stroke: false, fillColor: COULEUR_POINT, fillOpacity: 0.8
         }).bindPopup(popupHtml(b)).addTo(couche);
     });
-    document.getElementById('compteur').textContent =
-        liste.length.toLocaleString('fr-FR') + (liste.length > 1 ? ' bornes affichées' : ' borne affichée');
+    // Le compteur sous le filtre est mis a jour par rendrePagination (total cote serveur).
 }
 
 // Construit les lignes du tableau a partir d'une liste de points de charge.
@@ -96,7 +98,16 @@ function afficherLignesTableau(lignes) {
     });
 }
 
-// Charge UNE page du tableau.
+// Renvoie les valeurs courantes des trois filtres (commune, operateur, puissance).
+function filtresActuels() {
+    return {
+        commune: document.getElementById('rech-commune').value.trim(),
+        operateur: document.getElementById('filtre-operateur').value,
+        puissance: document.getElementById('filtre-puissance').value
+    };
+}
+
+// Charge UNE page du tableau en appliquant les filtres cote serveur.
 async function chargerPageTableau(page) {
     if (page < 1) page = 1;
     pageCourante = page;
@@ -105,7 +116,16 @@ async function chargerPageTableau(page) {
     let total = 0;
     let lignes = [];
     if (apiOk) {
-        const reponse = await getData(API + '/points-charge/?limit=' + LIGNES_PAR_PAGE + '&offset=' + offset);
+        // On passe les filtres au serveur : le tableau ne montre que les bornes correspondantes.
+        const f = filtresActuels();
+        const params = new URLSearchParams({
+            limit: LIGNES_PAR_PAGE,
+            offset: offset,
+            commune: f.commune,
+            operateur: f.operateur,
+            puissance: f.puissance
+        });
+        const reponse = await getData(API + '/points-charge/?' + params.toString());
         if (reponse) {
             total = reponse.total;
             lignes = reponse.lignes;
@@ -146,6 +166,11 @@ function rendrePagination(total) {
 
     document.getElementById('note-tableau').textContent =
         `${total.toLocaleString('fr-FR')} résultat${total > 1 ? 's' : ''}`;
+
+    // Compteur sous le filtre : total des bornes correspondant au filtre.
+    // Pilote ici (et non dans afficherCarte) pour qu'il se mette a jour apres une suppression.
+    document.getElementById('compteur').textContent =
+        total.toLocaleString('fr-FR') + (total > 1 ? ' bornes affichées' : ' borne affichée');
 }
 
 // Clic sur un item du menu "..." d'une ligne (un seul ecouteur pour tout le tableau).
@@ -186,26 +211,40 @@ function modifier(borne) {
     new bootstrap.Modal(document.getElementById('modalEdit')).show();
 }
 
-// Filtre de la CARTE (le tableau, lui, est paginé côté serveur, indépendamment).
-function filtrer() {
-    const q = document.getElementById('rech-commune').value.trim().toLowerCase();
-    const op = document.getElementById('filtre-operateur').value;
-    const pu = document.getElementById('filtre-puissance').value;
-    const res = bornes.filter(b => {
-        if (q && !((b.commune || '').toLowerCase().includes(q) || (b.nom || '').toLowerCase().includes(q))) return false;
-        if (op && b.operateur !== op) return false;
-        if (pu && categorie(b.puissance) !== pu) return false;
-        return true;
-    });
-    afficherCarte(res);
+// Recharge differee du tableau : evite de requeter le serveur a chaque frappe clavier.
+let timerTableau = null;
+function planifierRechargeTableau() {
+    clearTimeout(timerTableau);
+    timerTableau = setTimeout(() => chargerPageTableau(1), 300);
 }
 
+// Filtre : la CARTE est filtree cote client (immediat), le TABLEAU cote serveur.
+function filtrer() {
+    const f = filtresActuels();
+    const q = f.commune.toLowerCase();
+    const res = bornes.filter(b => {
+        if (q && !((b.commune || '').toLowerCase().includes(q) || (b.nom || '').toLowerCase().includes(q))) return false;
+        if (f.operateur && b.operateur !== f.operateur) return false;
+        if (f.puissance && categorie(b.puissance) !== f.puissance) return false;
+        return true;
+    });
+    afficherCarte(res);              // carte : immediat (cote client)
+    planifierRechargeTableau();      // tableau : page 1 filtree (cote serveur, anti-rebond)
+}
+
+// Remplit la liste des operateurs et l'autocompletion des communes a partir des bornes chargees.
+// On reconstruit tout a chaque appel (pas d'ajout en double), pour prendre en compte les nouvelles bornes.
 function remplirControles() {
     const ops = [...new Set(bornes.map(b => b.operateur).filter(Boolean))].sort();
     const selOp = document.getElementById('filtre-operateur');
+    const choixOp = selOp.value;                    // on memorise l'operateur selectionne
+    selOp.innerHTML = '<option value="">Tous</option>';
     ops.forEach(o => { const opt = document.createElement('option'); opt.value = o; opt.textContent = o; selOp.appendChild(opt); });
+    selOp.value = choixOp;                           // on restaure le choix courant
+
     const communes = [...new Set(bornes.map(b => b.commune).filter(Boolean))].sort();
     const dl = document.getElementById('liste-communes');
+    dl.innerHTML = '';
     communes.slice(0, 2000).forEach(c => { const opt = document.createElement('option'); opt.value = c; dl.appendChild(opt); });
 }
 
@@ -234,6 +273,7 @@ document.getElementById('form-ajout').addEventListener('submit', function (e) {
     }).toString());
 
     bornes.push(b);
+    remplirControles();                 // maj de l'autocompletion (nouvelle commune / operateur)
     filtrer();                          // maj de la carte
     chargerPageTableau(pageCourante);   // maj du tableau
     map.setView([b.lat, b.lon], 13);

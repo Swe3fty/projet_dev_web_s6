@@ -1,4 +1,8 @@
 <?php
+// Routeur de l'API du site (point d'entree unique).
+// Lit la methode HTTP (GET/POST/PUT/DELETE) et l'URL, appelle la fonction de database.php
+// correspondante, puis renvoie la reponse en JSON. Les predictions passent par des scripts Python.
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -16,12 +20,14 @@ if (!$db) {
     exit;
 }
 
+// Decoupage de l'URL : ressource principale (ex : stations) + sous-ressource (ex : departements).
 $requestMethod    = $_SERVER['REQUEST_METHOD'];
 $request          = substr($_SERVER['PATH_INFO'] ?? '', 1);
 $request          = explode('/', $request);
 $requestRessource = array_shift($request);
 $subRessource     = array_shift($request);
 
+// Donnees envoyees par le client : formulaire classique, sinon corps JSON.
 $input = $_POST;
 if (empty($input)) {
     $input = json_decode(file_get_contents('php://input'), true);
@@ -40,7 +46,13 @@ if ($requestMethod == 'GET') {
     } elseif ($requestRessource == 'points-charge') {
         if (isset($_GET['limit'])) {
             $offset = isset($_GET['offset']) ? (int) $_GET['offset'] : 0;
-            $data = getPointsChargePage($db, (int) $_GET['limit'], $offset);
+            // Filtres optionnels du tableau (transmis par la page Visualisation).
+            $filtres = [
+                'commune'   => $_GET['commune']   ?? '',
+                'operateur' => $_GET['operateur'] ?? '',
+                'puissance' => $_GET['puissance'] ?? ''
+            ];
+            $data = getPointsChargePage($db, (int) $_GET['limit'], $offset, $filtres);
         } else {
             $data = getPointsCharge($db);
         }
@@ -234,6 +246,7 @@ elseif ($requestMethod == 'DELETE') {
     }
 }
 
+// Reponse finale : on renvoie le resultat en JSON, ou une erreur si la requete a echoue.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-control: no-store, no-cache, must-revalidate');
 header('Pragma: no-cache');

@@ -1,13 +1,18 @@
+// Page Prediction implantation : recupere l'ID de borne dans l'URL, interroge l'IA
+// (Random Forest via l'API PHP) et affiche le type d'implantation predit + les probabilites.
 document.addEventListener('DOMContentLoaded', async () => {
+    // L'ID de la borne est passe dans l'URL (ex : prediction.html?id=123).
     const urlParams = new URLSearchParams(window.location.search);
     const idPdc = urlParams.get('id');
 
+    // Sans ID on ne peut rien predire : retour a la page de visualisation.
     if (!idPdc) {
         window.location.href = 'visualisation.html';
         return;
     }
 
     try {
+        // Envoi de l'ID a l'API qui lance la prediction cote serveur.
         const response = await fetch('php/request.php/predictions/implantation/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

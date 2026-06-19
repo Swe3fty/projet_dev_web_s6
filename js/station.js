@@ -1,5 +1,6 @@
 'use strict';
 
+// Petit script de test : recupere la liste des departements depuis l'API et l'affiche en console.
 requestStationsMap();
 
 async function requestStationsMap() {

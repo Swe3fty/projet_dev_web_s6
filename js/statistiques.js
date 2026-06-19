@@ -1,5 +1,8 @@
 'use strict';
 
+// Page Statistiques : remplit la liste des departements, recupere les chiffres du departement
+// choisi via l'API PHP, et dessine trois graphiques avec Chart.js.
+
 let instanceChartPuissances = null;
 let instanceChartOperateurs = null;
 let instanceChartImplantation = null;
@@ -111,6 +114,7 @@ function displayStatistiques(data){
 }
 
 
+// Dessine les trois graphiques. On detruit les anciens avant pour eviter les superpositions.
 function afficherGraphiques(stats) {
     if (instanceChartPuissances) instanceChartPuissances.destroy();
     if (instanceChartOperateurs) instanceChartOperateurs.destroy();

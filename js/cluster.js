@@ -1,3 +1,4 @@
+// Page Clusters : affiche les points de charge colores selon le cluster predit (modele KMeans).
 document.addEventListener('DOMContentLoaded', () => {
     const API_CLUSTER = 'php/request.php/predictions/clusters/';
 
@@ -9,12 +10,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const layerClusters = L.layerGroup().addTo(map);
 
+    // Une couleur par cluster (5 clusters au maximum).
     const couleurs = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6'];
 
+    // Renvoie la couleur associee a un numero de cluster.
     function couleurCluster(cluster) {
         return couleurs[Math.abs(parseInt(cluster, 10)) % couleurs.length];
     }
 
+    // Affiche un message d'etat (chargement, succes, erreur) au-dessus de la carte.
     function setMessage(message, type = 'info') {
         const zone = document.getElementById('message-cluster');
         if (!zone) return;
@@ -22,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         zone.textContent = message;
     }
 
+    // Construit la legende (un point colore + le numero de cluster).
     function afficherLegende() {
         const legend = document.getElementById('legend');
         if (!legend) return;
@@ -35,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Contenu de la bulle affichee au clic sur un point.
     function popup(point) {
     return `
         <strong>${point.station || 'Station inconnue'}</strong><br>
@@ -44,13 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
     `;
     }
 
+    // Place tous les points sur la carte puis cadre la vue dessus.
     function afficherPoints(points) {
         layerClusters.clearLayers();
         const bounds = [];
 
         points.forEach(point => {
-            const lat = parseFloat(point.latitude);
-            const lon = parseFloat(point.longitude);
+            // On accepte les deux noms de champ possibles (latitude/longitude ou lat/lon).
+            const lat = parseFloat(point.latitude ?? point.lat);
+            const lon = parseFloat(point.longitude ?? point.lon);
             if (Number.isNaN(lat) || Number.isNaN(lon)) return;
 
             const couleur = couleurCluster(point.cluster);
@@ -62,14 +70,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 weight: 1
             }).bindPopup(popup(point)).addTo(layerClusters);
 
-            bounds.push([lat, lon]);
+            // Pour le cadrage auto, on ne retient que la France metropolitaine : ca evite
+            // un dezoom mondial a cause de l'outre-mer ou d'une coordonnee aberrante (0,0).
+            if (lat >= 41 && lat <= 51.5 && lon >= -5.5 && lon <= 9.8) {
+                bounds.push([lat, lon]);
+            }
         });
 
         if (bounds.length > 0) {
-            map.fitBounds(bounds, { padding: [20, 20] });
+            map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13 });
         }
     }
 
+    // Demande les clusters a l'API (qui appelle le script Python) puis met a jour la carte.
     async function chargerClusters() {
         setMessage('Calcul des clusters en cours...', 'info');
 

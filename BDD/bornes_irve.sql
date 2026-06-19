@@ -1,5 +1,7 @@
 -- ----------------------------------------------------------
--- Script MYSQL pour mcd 
+-- Script MYSQL pour mcd
+-- Cree les 8 tables de la base (structure uniquement, sans donnees).
+-- Les donnees sont importees a part via bornes_data.sql (genere par scripts_bdd/export_sql.py).
 -- ----------------------------------------------------------
 
 

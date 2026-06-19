@@ -1,4 +1,6 @@
 <?php
+  // Acces a la base de donnees : une fonction par operation (lecture, ajout, modif, suppression).
+  // Ces fonctions sont appelees par le routeur request.php.
   require_once('constantes.php');
 
   //----------------------------------------------------------------------------
@@ -60,10 +62,49 @@
   //----------------------------------------------------------------------------
   // Récupération d'UNE page de points de charge (pour le tableau paginé côté serveur).
   // Renvoie ['total' => nombre total de points de charge, 'lignes' => la page].
-  function getPointsChargePage($db, $limit, $offset) {
+  function getPointsChargePage($db, $limit, $offset, $filtres = []) {
     try {
-        // Nombre total de points de charge (pour calculer le nombre de pages).
-        $total = $db->query('SELECT COUNT(*) FROM point_de_charge')->fetchColumn();
+        // Construction des conditions de filtre (commune/station, opérateur, puissance).
+        $conditions = [];
+        $params     = [];
+
+        if (!empty($filtres['commune'])) {
+            $conditions[] = '(c.nom_commune LIKE :recherche_c OR s.nom_station LIKE :recherche_s)';
+            $params[':recherche_c'] = '%' . $filtres['commune'] . '%';
+            $params[':recherche_s'] = '%' . $filtres['commune'] . '%';
+        }
+        if (!empty($filtres['operateur'])) {
+            $conditions[] = 'o.nom_operateur = :operateur';
+            $params[':operateur'] = $filtres['operateur'];
+        }
+        if (!empty($filtres['puissance'])) {
+            // Mêmes seuils que la fonction categorie() côté JS.
+            if ($filtres['puissance'] === 'rapide') {
+                $conditions[] = 'p.puissance_nominale > 50';
+            } elseif ($filtres['puissance'] === 'accel') {
+                $conditions[] = 'p.puissance_nominale >= 22 AND p.puissance_nominale <= 50';
+            } elseif ($filtres['puissance'] === 'normal') {
+                $conditions[] = 'p.puissance_nominale < 22';
+            }
+        }
+
+        $clauseWhere = $conditions ? (' WHERE ' . implode(' AND ', $conditions)) : '';
+
+        // Jointures communes au comptage et à la page (pour pouvoir filtrer sur commune/opérateur).
+        $jointures = ' FROM point_de_charge p
+                       LEFT JOIN station s   ON s.id_station_itinerance = p.id_station_itinerance
+                       LEFT JOIN commune c   ON c.code_insee_commune = s.code_insee_commune
+                       LEFT JOIN operateur o ON o.id_operateur       = s.id_operateur';
+
+        // Nombre total de points de charge (pour la pagination).
+        // Sans filtre : COUNT simple et rapide. Avec filtre : on ajoute les jointures necessaires.
+        if (empty($conditions)) {
+            $total = $db->query('SELECT COUNT(*) FROM point_de_charge')->fetchColumn();
+        } else {
+            $stmtTotal = $db->prepare('SELECT COUNT(*)' . $jointures . $clauseWhere);
+            $stmtTotal->execute($params);
+            $total = $stmtTotal->fetchColumn();
+        }
 
         // La page demandée : le point de charge + sa station / commune / opérateur.
         $query = 'SELECT p.id_pdc_itinerance AS id,
@@ -75,14 +116,14 @@
                          p.condition_acces    AS acces,
                          p.accessibilite_pmr  AS pmr,
                          p.tarification       AS tarification,
-                         p.gratuit            AS gratuit
-                  FROM point_de_charge p
-                  LEFT JOIN station s   ON s.id_station_itinerance = p.id_station_itinerance
-                  LEFT JOIN commune c   ON c.code_insee_commune = s.code_insee_commune
-                  LEFT JOIN operateur o ON o.id_operateur       = s.id_operateur
-                  ORDER BY p.id_pdc_itinerance
-                  LIMIT :limit OFFSET :offset';
+                         p.gratuit            AS gratuit'
+                  . $jointures . $clauseWhere .
+                  ' ORDER BY p.id_pdc_itinerance
+                    LIMIT :limit OFFSET :offset';
         $stmt = $db->prepare($query);
+        foreach ($params as $cle => $valeur) {
+            $stmt->bindValue($cle, $valeur);
+        }
         $stmt->bindValue(':limit', (int) $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', (int) $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -298,6 +339,8 @@
 
 
 
+  // Recupere un point de charge precis (avec sa station, commune et operateur) a partir de son id.
+  // Utilise par les pages de prediction pour fournir les caracteristiques de la borne a l'IA.
   function getPointChargeById($db, $id) {
     try {
         $query = 'SELECT p.id_pdc_itinerance    AS id,

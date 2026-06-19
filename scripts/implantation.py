@@ -1,3 +1,7 @@
+# Script de prediction du type d'implantation d'une borne (modele Random Forest).
+# Appele par PHP : il lit un fichier JSON (caracteristiques de la borne) et renvoie
+# le type d'implantation predit + les probabilites par classe, en JSON.
+
 import argparse
 import json
 import sys
@@ -16,8 +20,21 @@ ENCODER_PATH = os.path.join(BASE_DIR, 'label_encoder_target.pkl')
 FEATURES_PATH = os.path.join(BASE_DIR, 'feature_names.pkl')
 
 
+def extraire_si_zip(pkl_path):
+    """Si le .pkl est absent mais que le .zip existe, on le decompresse (utile apres un deploiement)."""
+    if os.path.exists(pkl_path):
+        return
+    zip_path = os.path.splitext(pkl_path)[0] + '.zip'
+    if os.path.exists(zip_path):
+        import zipfile
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.extractall(os.path.dirname(pkl_path))
+
+
 def load_models():
     """Charge les modèles et artefacts de prétraitement depuis le disque."""
+    # Le gros modele est livre compresse (.zip) : on l'extrait au premier appel si besoin.
+    extraire_si_zip(MODEL_PATH)
     for path, name in [
         (MODEL_PATH, 'best_model_rf.pkl'),
         (PREPROC_PATH, 'preprocessor.pkl'),

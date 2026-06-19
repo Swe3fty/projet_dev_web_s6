@@ -1,4 +1,6 @@
-.h1-montserrat { 
+/* Style propre aux pages de prediction (implantation et puissance) : titres et fonds colores */
+
+.h1-montserrat {
     font-family: 'Montserrat', sans-serif; font-size: 36px; 
 }
 .bg-purple-light {

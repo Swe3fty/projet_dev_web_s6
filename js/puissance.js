@@ -1,3 +1,6 @@
+// Page Prediction puissance : recupere l'ID dans l'URL, interroge l'IA via l'API PHP
+// et affiche la categorie de puissance recommandee (normale / acceleree / rapide).
+
 // 1. Récupération de l'ID qui est dans l'URL (ex: puissance.html?id=123)
 const paramsRecherche = new URLSearchParams(window.location.search);
 const idBorne = paramsRecherche.get('id');
