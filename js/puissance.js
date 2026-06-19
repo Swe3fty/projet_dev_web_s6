@@ -11,21 +11,22 @@ if (idBorne) {
 
 // 3. La fonction qui contacte le PHP en POST
 async function requestPredictionPuissance(idPdc) {
-    const url = `php/request.php/predictions/puissance`;
+    const url = `php/request.php/predictions/puissance/`;
 
     try {
         const response = await fetch(url, {
-            method: 'POST', // On utilise bien POST comme défini dans ton PHP
+            method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ id: idPdc }) // L'ID est envoyé dans le corps de la requête
+            body: JSON.stringify({ id: idPdc })
         });
 
         const data = await response.json();
 
         if (response.ok) {
             console.log("Résultat de l'IA :", data);
+            afficherInfosStation(data);
             afficherResultatPrediction(data.prediction_puissance);
         } else {
             console.error('Erreur API :', data.erreur);
@@ -35,27 +36,43 @@ async function requestPredictionPuissance(idPdc) {
     }
 }
 
+// 4. Affiche les infos de la station dans les éléments HTML prévus
+function afficherInfosStation(data) {
+    const elAdresse = document.getElementById('pdc-adresse');
+    const elInfos   = document.getElementById('pdc-infos');
+
+    if (elAdresse) {
+        elAdresse.textContent = data.commune
+            ? data.commune.charAt(0).toUpperCase() + data.commune.slice(1)
+            : 'Commune non disponible';
+    }
+
+    if (elInfos) {
+        const puissance = data.puissance ? `${data.puissance} kW` : 'N/A';
+        const operateur = data.operateur ?? 'N/A';
+        elInfos.textContent = `ID : ${data.id ?? idBorne} · Puissance : ${puissance} · Opérateur : ${operateur}`;
+    }
+}
+
+// 5. Affiche le résultat de la prédiction
 function afficherResultatPrediction(prediction) {
     const conteneur = document.getElementById('div-prediction-resultat');
-    
+
     if (conteneur) {
-        // On rend la boîte visible
         conteneur.style.display = 'block';
 
-        // Petit "nettoyage" du texte pour faire plus propre
         let textePropre = prediction;
-        if (prediction === "1_normale" || prediction.includes("normal")) {
+        if (prediction === "1_normale" || prediction?.includes("normal")) {
             textePropre = "Normale (< 22 kW)";
-        } else if (prediction === "2_acceleree" || prediction.includes("acceleree")) {
+        } else if (prediction === "2_acceleree" || prediction?.includes("acceleree")) {
             textePropre = "Accélérée (22-50 kW)";
-        } else if (prediction === "3_rapide" || prediction.includes("rapide")) {
+        } else if (prediction === "3_rapide" || prediction?.includes("rapide")) {
             textePropre = "Rapide (> 50 kW)";
         }
 
-        // On injecte le HTML avec l'icône éclair
         conteneur.innerHTML = `
-            <h3 style="color: #4BA037; margin-bottom: 0;">
-                <i class="fa-solid fa-bolt" style="color: #ffc107;"></i> 
+            <h3>
+                <i class="fa-solid fa-bolt"></i>
                 Puissance recommandée : <strong>${textePropre}</strong>
             </h3>
             <p class="text-muted mt-2 mb-0" style="font-size: 14px;">Basé sur l'analyse de l'environnement de la station.</p>

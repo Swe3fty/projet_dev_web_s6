@@ -153,6 +153,63 @@ elseif ($requestMethod == 'POST') {
             }
         }
     }
+    // --- PUISSANCE ---
+    elseif ($requestRessource == 'predictions' && $subRessource == 'puissance') {
+        $id = $input['id'] ?? null;
+
+        if (!$id) {
+            $code = 400;
+            $data = ['erreur' => 'ID du point de charge manquant'];
+        } else {
+            $pdcData = getPointChargeById($db, $id);
+
+            if (!$pdcData) {
+                $code = 404;
+                $data = ['erreur' => 'Point de charge introuvable'];
+            } else {
+                $mappedData = [
+                    'consolidated_latitude'  => $pdcData['lat'] ?? 0,
+                    'consolidated_longitude' => $pdcData['lon'] ?? 0,
+                    'condition_acces'        => $pdcData['acces'] ?? 'accès libre',
+                    'nbre_pdc'               => $pdcData['nb_pdc'] ?? 1,
+                    'implantation_station'   => $pdcData['implantation_station'] ?? 'Voirie'
+                ];
+
+                $tempDir = sys_get_temp_dir();
+                $tempFilePath = $tempDir . DIRECTORY_SEPARATOR . 'temp_puissance_' . md5($id) . '.json';
+
+                file_put_contents($tempFilePath, json_encode([$mappedData], JSON_UNESCAPED_UNICODE));
+
+                $scriptsDir = realpath(__DIR__ . '/../scripts');
+                $pythonExe = 'python3';
+                $scriptPath = $scriptsDir . DIRECTORY_SEPARATOR . 'prediction_puissance.py';
+
+                $command = $pythonExe . ' '
+                    . escapeshellarg($scriptPath)
+                    . ' --file '
+                    . escapeshellarg($tempFilePath)
+                    . ' 2>&1';
+
+                $output = shell_exec($command);
+
+                if (file_exists($tempFilePath)) {
+                    unlink($tempFilePath);
+                }
+
+                $predictionResult = json_decode($output, true);
+
+                if (!$predictionResult || (isset($predictionResult['status']) && $predictionResult['status'] == 'error')) {
+                    $code = 500;
+                    $data = [
+                        'erreur' => 'Erreur de l IA puissance',
+                        'details' => $output
+                    ];
+                } else {
+                    $data = array_merge($pdcData, $predictionResult);
+                }
+            }
+        }
+    }
 }
 
 // --- PUT ---
