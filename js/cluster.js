@@ -36,13 +36,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function popup(point) {
-        return `
-            <strong>${point.station || 'Station inconnue'}</strong><br>
-            Commune : ${point.commune || 'n.c.'}<br>
-            Puissance : ${point.puissance ?? 'n.c.'} kW<br>
-            Cluster : <strong>${point.cluster}</strong><br>
-            ID : ${point.id || 'n.c.'}
-        `;
+    return `
+        <strong>${point.station || 'Station inconnue'}</strong><br>
+        Commune : ${point.commune || 'n.c.'}<br>
+        Puissance : ${point.puissance ?? 'n.c.'} kW<br>
+        Cluster : <strong>${point.cluster}</strong>
+    `;
     }
 
     function afficherPoints(points) {

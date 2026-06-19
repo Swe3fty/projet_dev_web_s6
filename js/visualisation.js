@@ -212,15 +212,10 @@ function remplirControles() {
 ['rech-commune', 'filtre-operateur', 'filtre-puissance'].forEach(id =>
     document.getElementById(id).addEventListener('input', filtrer));
 
-// Bouton "Predire les clusters" : on envoie vers cluster.html avec la borne selectionnee.
+// Bouton "Prédire les clusters" : pas besoin de sélectionner une borne.
 document.getElementById('btn-cluster').addEventListener('click', function (e) {
     e.preventDefault();
-    const choix = document.querySelector('input[name="sel-borne"]:checked');
-    if (!choix) {
-        alert('Sélectionnez une borne dans le tableau (bouton radio) avant de prédire.');
-        return;
-    }
-    window.location.href = 'cluster.html?id=' + encodeURIComponent(choix.value);
+    window.location.href = 'cluster.html';
 });
 
 // Ajout d'une borne : cree une station + un point de charge (POST), affichage immediat.
